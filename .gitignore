@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Except these
+!.gitignore
+!minetestbot.lua
+!lua_api.txt
+!settings.example
+!README.md
+
+

@@ -1,0 +1,18 @@
+-- Bot settings
+botSettings = {
+	token = "Bot ABCDEFG", -- Bot Token
+	prefix = "~", -- Command Prefix
+	color = 157200, -- Embed color (integer)
+}
+
+-- Per-server settings
+botSettings.servers = {
+	["My Awesome Discord Server"] = {
+		rules = {
+			{"Rule number one", "Subtext"},
+			{"Rule number two", ""},
+		},
+		bot_channel = "<#1234567890>", -- ID for bot command channel (currently unused)
+		pingsock = ":pingsock:478355019293523970", -- Pingsock emote ID (will be changed later)
+	},
+}
