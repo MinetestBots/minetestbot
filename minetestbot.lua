@@ -41,11 +41,8 @@ local stable_version = "0.4.17.1"
 local unstable_version = "5.0"
 
 local function readUrl(url)
-	local body, err = pcall(http.request("GET", url))
+	local _, body = http.request("GET", url)
 	local lines = {}
-	if err then
-		return lines
-	end
 	function adjust(s)
 		if s:sub(-1)~="\n" then s=s.."\n" end
 		return s:gmatch("(.-)\n")
