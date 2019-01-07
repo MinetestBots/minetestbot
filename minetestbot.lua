@@ -14,14 +14,124 @@ local prefix = botSettings.prefix
 local color = botSettings.color
 local servers = botSettings.servers
 
-local stable_version = "0.4.17.1"
-local bleeding_version = "5.0"
+local function botEmoji()
+	local list = {}
+	local emoteServer = client:getGuild("531580497789190145")
+	for i in pairs(emoteServer.emojis) do
+		local emoji = emoteServer:getEmoji(i)
+		list[emoji.name] = ":"..emoji.name..":"..i
+	end
+	return list
+end
 
--- Page limits
-local perpage = {
-	lua_api = 6,
-	modbook = 10,
-}
+function string:split(delimiter, max)
+	local result = {}
+	for match in (self..delimiter):gmatch("(.-)"..delimiter) do
+		if max and #result == max then
+			result[max+1] = self
+			break
+		end
+		table.insert(result, match)
+		self = self:sub(match:len()+2)
+	end
+	return result
+end
+
+local stable_version = "0.4.17.1"
+local unstable_version = "5.0"
+
+local function readUrl(url)
+	local body, err = pcall(http.request("GET", url))
+	local lines = {}
+	if err then
+		return lines
+	end
+	function adjust(s)
+		if s:sub(-1)~="\n" then s=s.."\n" end
+		return s:gmatch("(.-)\n")
+	end
+	for line in adjust(body) do
+		lines[#lines+1] = line
+	end
+	return lines
+end
+
+local function searchUrl(url, term, def, page)
+	local pages = 1
+	local results = {}
+	local resultMax = def.max or 10
+	local resultIcon = def.icon or "https://magentys.io/wp-content/uploads/2017/04/github-logo-1.png" --github logo
+	local resultTitle = def.title or "Search Results"
+	if not page then
+		page = 1
+	end
+
+	-- Adjust URL
+	local cutoff = url:find("%.com/")
+	url = url:sub(cutoff+5):gsub("#%w+", "")
+
+	local githubUrl = "https://github.com/"..url
+	local rawUrl = "https://raw.githubusercontent.com/"..url:gsub("/blob", "", 1)
+
+	-- Read the API
+	for num, line in pairs(readUrl(rawUrl)) do
+		-- Add a field with the line number and a preview (link)
+		if line:lower():find(term:lower()) or line:lower():find(term:lower():gsub(" ", "_")) then
+			results[#results+1] = {
+				name = "Line "..tostring(num)..":",
+				value = "[```\n"..line:gsub("[%[%]]", "").."\n```]("..githubUrl.."#L"..num..")"
+			}
+		end
+	end
+
+	local fields = {}
+
+	-- Did we get anything?
+	if #results == 0 then
+		local embed = {
+			title = resultTitle,
+			description = "No results!",
+			color = color
+		}
+		return embed
+	end
+
+	-- Did we get more than max results?
+	if #results > resultMax then
+		-- Did we get way too many?
+		if #results > 100 then
+			local embed = {
+				title = "Error: Result overflow!",
+				description = "Got "..#results.." results. Search [the URL]("..githubUrl..") manually instead.",
+				color = color
+			}
+			return embed
+		end
+		pages = math.ceil(#results / resultMax )
+		for i = 1, #results do
+			if i > resultMax*(page-1) and i <= resultMax*(page) then
+				fields[#fields+1] = results[i]
+			end
+		end
+	else
+		fields = table.copy(results)
+	end
+	
+	local embed = {
+		title = resultTitle,
+		thumbnail = {
+			url = resultIcon,
+		},
+		description = "Results for [`"..term.."`]("..githubUrl.."):",
+		color = color,
+		footer = {
+			text = "Page "..page.."/"..pages
+		},
+		fields = fields
+	}
+
+	return embed
+end
 
 -- Command functions
 local exe = {
@@ -473,7 +583,7 @@ local exe = {
 				end
 			end
 			-- Did we get more than 10 results?
-			local max = perpage.modbook
+			local max = 10
 			if #results > max then
 				pages = math.ceil(#results / max )
 				for i = 1,#results do
@@ -616,10 +726,10 @@ local exe = {
 						},
 						{
 							name = "lua_api.txt (stable, "..stable_version..")",
-							value = "Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/6dc7177a5de51f1329c1be04e7f07be64d5cc76c/doc/lua_api.txt)."
+							value = "Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/"..stable_version.."/doc/lua_api.txt)."
 						},
 						{
-							name = "lua_api.txt (bleeding, "..bleeding_version..")",
+							name = "lua_api.txt (bleeding, "..unstable_version..")",
 							value = "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/master/doc/lua_api.txt)."
 						},
 					}
@@ -628,59 +738,41 @@ local exe = {
 		else
 			-- Get the actual term
 			local term = msg:sub(termidx+1)
-			local line_num = 0
-			local pages = 1
-			local results = {}
-
-			-- Read the API
-			for line in io.lines("./lua_api.txt") do
-				line_num = line_num + 1
-				-- Add a field with the line number and a preview (link)
-				if line:lower():find(term:lower()) or line:lower():find(term:lower():gsub(" ", "_")) then
-					results[#results+1] = {
-						name = "Line "..tostring(line_num)..":",
-						value = "[```\n"..line:gsub("[%[%]]", "").."\n```](https://github.com/minetest/minetest/blob/6dc7177a5de51f1329c1be04e7f07be64d5cc76c/doc/lua_api.txt#L"..tostring(line_num)..")"
-					}
-				end
-			end
-
-			local max = perpage.lua_api
-			-- Did we get more than 10 results?
-			if #results > max then
-				-- Did we get way too many?
-				if #results > 100 then
-					message.channel:send({
-						embed = {
-							title = "Error: Result overflow!",
-							description = "Got "..tostring(#results).." results. Search [the API](https://github.com/minetest/minetest/blob/6dc7177a5de51f1329c1be04e7f07be64d5cc76c/doc/lua_api.txt) manually instead.",
-							color = color
-						}
-					})
-					return
-				end
-				pages = math.ceil(#results / max )
-				for i = 1,#results do
-					if i > max then
-						results[i] = nil
-					end
-				end
-			end
-			-- Send the message
 			message.channel:send({
-				embed = {
+				embed = searchUrl("https://github.com/minetest/minetest/blob/"..stable_version.."/doc/lua_api.txt", term, {
+					icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
 					title = "Minetest Lua API",
-					thumbnail = {
-						url = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
-					},
-					description = "Results for `"..term.."`:",
-					color = color,
-					footer = {
-						text = "Page 1/"..tostring(pages)
-					},
-					fields = results
-				}
+					max = 6,
+				})
 			})
 		end
+	end,
+	-- GitHub file search
+	["githubsearch"] = function(message)
+		local msg = message.content:gsub("^"..client.user.mentionString.." ", prefix)
+		-- Do we have a search term
+		msg = msg:split(" ", 2)
+		local url = msg[2]
+		local term = msg[3]
+		if not url then
+			message.channel:send("Empty command!")
+		 	return
+		end
+		if not term then
+			message.channel:send("Empty search term!")
+		 	return
+		end
+		if not url:find("github%.com/") then
+			message.channel:send("Not a valid GitHub URL!")
+			return
+		end
+
+		message.channel:send({
+			embed = searchUrl(url, term, {
+				title = "GitHub Search",
+				max = 6,
+			})
+		})
 	end,
 }
 
@@ -715,6 +807,11 @@ local commands = {
 		aliases = {"api", "rtfm", "docs", "doc"},
 		description = "Get Lua API links",
 		exec = exe.lua_api
+	},
+	["githubsearch"] = {
+		aliases = {"ghsearch", "github"},
+		description = "Search a GitHub file",
+		exec = exe.githubsearch
 	},
 }
 
@@ -751,15 +848,8 @@ client:on("messageCreate", function(message)
 		local args = message.content:gsub("^"..client.user.mentionString.." ", prefix):split(" ")
 
 		if message.content == client.user.mentionString then
-			local servername = message.guild.name
-			local pingsock = servers[servername].pingsock
-			if not pingsock then
-				return
-			end
 			-- Send pingsock
-			message.channel:send({
-				content = "<"..pingsock..">"
-			})
+			message.channel:send("<"..botEmoji().pingsock..">")
 			return
 		end
 
@@ -869,7 +959,7 @@ end)
 -- Page functions
 local pages = {
 	["Minetest Modding Book"] = function(page)
-		local current_page = page.current_page
+		local current_page = page.current
 		local results = {}
 		local fields = {}
 		-- Get the sitemap
@@ -893,39 +983,33 @@ local pages = {
 				}
 			end
 		end
-		local max = perpage.modbook
+		local max = 10
 		for i = 1,#results do
 			if i > max*(current_page-1) and i <= max*(current_page) then
 				fields[#fields+1] = results[i]
 			end
 		end
-		return fields
+		return fields, "fields"
 	end,
 	["Minetest Lua API"] = function(page)
-		local current_page = page.current_page
 		local embed = page.embed
-		local term = embed.description:sub(embed.description:find("`")+1):gsub("`:", "")
-		local line_num = 0
-		local results = {}
-		local fields = {}
-		-- Read the API
-		for line in io.lines("./lua_api.txt") do
-			line_num = line_num + 1
-			if line:lower():find(term:lower()) or line:lower():find(term:lower():gsub(" ", "_")) then
-				-- Add a field with the line number and a preview (link)
-				results[#results+1] = {
-					name = "Line "..tostring(line_num)..":",
-					value = "[```\n"..line:gsub("[%[%]]", "").."\n```](https://github.com/minetest/minetest/blob/6dc7177a5de51f1329c1be04e7f07be64d5cc76c/doc/lua_api.txt#L"..tostring(line_num)..")"
-				}
-			end
-		end
-		local max = perpage.lua_api
-		for i = 1,#results do
-			if i > max*(current_page-1) and i <= max*(current_page) then
-				fields[#fields+1] = results[i]
-			end
-		end
-		return fields
+		local desc = embed.description
+		local term = desc:sub(desc:find("`")+1, desc:find("`%]")-1)
+		return searchUrl("https://github.com/minetest/minetest/blob/0.4.17.1/doc/lua_api.txt", term, {
+			icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
+			title = "Minetest Lua API",
+			max = 6,
+		}, page.current), "embed"
+	end,
+	["GitHub Search"] = function(page)
+		local embed = page.embed
+		local desc = embed.description
+		local term = desc:sub(desc:find("`")+1, desc:find("`%]")-1)
+		local url = desc:sub(desc:find("%]%(")+2, desc:find("%)")-1)
+		return searchUrl(url, term, {
+			title = "GitHub Search",
+			max = 6,
+		}, page.current), "embed"
 	end,
 }
 
@@ -964,22 +1048,25 @@ local function page_turner(reaction, userId)
 									current_page = current_page - 1
 								end
 							end
-							local input = pages[embed.title]({
-								reaction = reaction,
-								current_page = current_page,
+							local input, type = pages[embed.title]({
+								current = current_page,
 								embed = embed,
 							})
 							-- Edit the message
-							message:setEmbed({
-								title = embed.title or nil,
-								thumbnail = embed.thumbnail or nil,
-								description = embed.description or nil,
-								color = color,
-								footer = {
-									text = "Page "..tostring(current_page).."/"..page_total
-								},
-								fields = input,
-							})
+							if type == "fields" then
+								message:setEmbed({
+									title = embed.title or nil,
+									thumbnail = embed.thumbnail or nil,
+									description = embed.description or nil,
+									color = color,
+									footer = {
+										text = "Page "..tostring(current_page).."/"..page_total
+									},
+									fields = input,
+								})
+							else
+								message:setEmbed(input)
+							end						
 						end
 					end
 				end
