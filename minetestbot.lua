@@ -532,7 +532,7 @@ local exe = {
 		-- Send the message
 		message.channel:send({
 			embed = {
-				url = ur"https://content.minetest.net/packages/"..author.."/"..name.."/",
+				url = "https://content.minetest.net/packages/"..author.."/"..name.."/",
 				title = "**"..title.."**",
 				description = "By "..author,
 				color = color,
