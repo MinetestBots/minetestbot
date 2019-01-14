@@ -16,6 +16,7 @@ dofile("util.lua")
 -- General Minetest command
 mbot.register_command("minetest", {
 	description = "General Minetest helpers.",
+	usage = "Use empty command to see options.",
 	aliases = {"mt"},
 	func = function(message)
 		-- Get arguments
@@ -215,6 +216,8 @@ mbot.register_command("minetest", {
 -- Server rules
 mbot.register_command("rules", {
 	description = "List rules.",
+	usage = "rules [rule number]",
+	aliases = {"r"},
 	func = function(message)
 		local msg = message.content
 		-- Make sure we are a staff member
@@ -225,7 +228,11 @@ mbot.register_command("rules", {
 		end
 		-- Do we have rules for this server?
 		local servername = message.guild.name
-		local rules = mbot.servers[servername].rules
+		local server = mbot.servers[servername]
+		if not server then
+			return
+		end
+		local rules = server.rules
 		if not rules then
 			return
 		end
@@ -280,6 +287,7 @@ mbot.register_command("rules", {
 -- ContentDB search
 mbot.register_command("cdb", {
 	description = "Search the ContentDB",
+	usage = "cdb <search term>",
 	aliases = {"mod", "modsearch", "search"},
 	func = function(message)
 		local msg = message.content
@@ -391,6 +399,7 @@ mbot.register_command("cdb", {
 -- Minetest Modding Book search
 mbot.register_command("modbook", {
 	description = "Search the Modding Book",
+	usage = "modbook [search term]",
 	aliases = {"book"},
 	func = function(message)
 		local msg = message.content
@@ -581,6 +590,7 @@ mbot.register_command("modbook", {
 -- RTFM
 mbot.register_command("lua_api", {
 	description = "Get Lua API links",
+	usage = "lua_api <search term>",
 	aliases = {"api", "rtfm", "docs", "doc"},
 	func = function(message)
 		local msg = message.content
@@ -640,6 +650,7 @@ mbot.register_command("lua_api", {
 -- GitHub file search
 mbot.register_command("githubsearch", {
 	description = "Search a GitHub file",
+	usage = "githubsearch <url> <search term>",
 	aliases = {"ghsearch", "github", "gh"},
 	func = function(message)
 		local msg = message.content
@@ -681,6 +692,7 @@ mbot.register_command("githubsearch", {
 
 mbot.register_command("lmgtfy", {
 	description = "Let Me Google That For You.",
+	usage = "lmgtfy [-s|iie] [-g|y|d|b] <search term>",
 	aliases = {"google", "www"},
 	func = function(message)
 		local term = message.content:split(" ", 1)[2]
@@ -771,6 +783,7 @@ client:on("messageCreate", function(message)
 		-- If we get this far, see if the command is 'help'
 		if args[1] == mbot.prefix.."help" then
 			local fields = {}
+			local helplist = ""
 			-- Did we specify a command?
 			if args[2] then
 				if mbot.aliases[args[2]] then
@@ -789,7 +802,20 @@ client:on("messageCreate", function(message)
 						infostr = infostr:sub(1,-2)
 					end
 					if cmd.description then
-						infostr = cmd.description.." | "..infostr
+						if cmd.aliases then
+							infostr = cmd.description.." | "..infostr
+						else
+							infostr = cmd.description
+						end
+					end
+					local usg = ""
+					if cmd.usage then
+						usg = "Usage: `"..cmd.usage.."`"
+					end
+					if infostr ~= "" then
+						infostr = infostr.."\n"..usg
+					else
+						infostr = usg
 					end
 					if infostr == "" then
 						infostr = "⠀"
@@ -824,7 +850,11 @@ client:on("messageCreate", function(message)
 							infostr = infostr:sub(1,-2)
 						end
 						if def.description then
-							infostr = def.description.." | "..infostr
+							if def.aliases then
+								infostr = def.description.." | "..infostr
+							else
+								infostr = def.description
+							end
 						end
 						if infostr == "" then
 							infostr = "⠀"
@@ -835,6 +865,7 @@ client:on("messageCreate", function(message)
 						}
 					end
 				end
+				helplist = " | See "..mbot.prefix.."help <command> for usage."
 			end
 			-- Send the message
 			message.channel:send({
@@ -846,7 +877,7 @@ client:on("messageCreate", function(message)
 					color = mbot.color,
 					fields = fields,
 					footer = {
-						text = "Prefix: ".. mbot.prefix
+						text = "Prefix: ".. mbot.prefix..helplist
 					},
 				}
 			})

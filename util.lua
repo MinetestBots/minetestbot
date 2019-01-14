@@ -222,8 +222,9 @@ function mbot.register_command(name, def)
 	mbot.commands[name] = {
 		func = def.func,
 		description = def.description,
+		usage = def.usage,
 		aliases = def.aliases,
-		secret = def.secret or nil,
+		secret = def.secret,
 	}
 	if def.aliases then
 		for _,alias in pairs(def.aliases) do
