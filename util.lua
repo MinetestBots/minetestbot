@@ -196,7 +196,7 @@ function mbot.pageTurn(reaction, userId)
 					description = embed.description or nil,
 					color = mbot.color,
 					footer = {
-						text = "Page "..current_page.."/"..page_total
+						text = "Page "..current_page.."/"..page_total.." | "..text[3]
 					},
 					fields = input,
 				})
@@ -224,6 +224,7 @@ function mbot.register_command(name, def)
 		description = def.description,
 		usage = def.usage,
 		aliases = def.aliases,
+		page = def.page,
 		secret = def.secret,
 	}
 	if def.aliases then
