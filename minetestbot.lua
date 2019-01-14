@@ -1,197 +1,26 @@
--- Get HTTPs API, json string to lua table, and Discord API
-local http = require("coro-http")
-local json = require("json")
-local discordia = require("discordia")
-local client = discordia.Client()
+--[[ Init ]]--
+
+-- Get HTTPs API, json string to lua table, url handler, and Discord API
+_G.http = require("coro-http")
+_G.json = require("json")
+_G.url = require("socket.url")
+_G.discordia = require("discordia")
+_G.client = discordia.Client()
 discordia.extensions()
-dofile("settings.lua")
 
-local dbg = function(msg)
-	discordia.Logger(4, tostring(os.date())):log(4, tostring(msg))
-end
+-- Get utils
+dofile("util.lua")
 
-local prefix = botSettings.prefix
-local color = botSettings.color
-local servers = botSettings.servers
+--[[ Register Commands ]]--
 
-local function botEmoji()
-	local list = {}
-	local emoteServer = client:getGuild("531580497789190145")
-	for i in pairs(emoteServer.emojis) do
-		local emoji = emoteServer:getEmoji(i)
-		list[emoji.name] = ":"..emoji.name..":"..i
-	end
-	return list
-end
-
-function string:split(delimiter, max)
-	local result = {}
-	for match in (self..delimiter):gmatch("(.-)"..delimiter) do
-		if max and #result == max then
-			result[max+1] = self
-			break
-		end
-		table.insert(result, match)
-		self = self:sub(match:len()+2)
-	end
-	return result
-end
-
-local stable_version = "0.4.17.1"
-local unstable_version = "5.0"
-
-local function readUrl(url)
-	local _, body = http.request("GET", url)
-	local lines = {}
-	function adjust(s)
-		if s:sub(-1)~="\n" then s=s.."\n" end
-		return s:gmatch("(.-)\n")
-	end
-	for line in adjust(body) do
-		lines[#lines+1] = line
-	end
-	return lines
-end
-
-local function searchUrl(url, term, def, page)
-	local pages = 1
-	local results = {}
-	local resultMax = def.max or 10
-	local resultIcon = def.icon or "https://magentys.io/wp-content/uploads/2017/04/github-logo-1.png" --github logo
-	local resultTitle = def.title or "Search Results"
-	if not page then
-		page = 1
-	end
-
-	-- Adjust URL
-	local cutoff = url:find("%.com/")
-	url = url:sub(cutoff+5):gsub("#%w+", "")
-
-	local githubUrl = "https://github.com/"..url
-	local rawUrl = "https://raw.githubusercontent.com/"..url:gsub("/blob", "", 1)
-
-	-- Read the API
-	for num, line in pairs(readUrl(rawUrl)) do
-		-- Add a field with the line number and a preview (link)
-		if line:lower():find(term:lower()) or line:lower():find(term:lower():gsub(" ", "_")) then
-			results[#results+1] = {
-				name = "Line "..tostring(num)..":",
-				value = "[```\n"..line:gsub("[%[%]]", "").."\n```]("..githubUrl.."#L"..num..")"
-			}
-		end
-	end
-
-	local fields = {}
-
-	-- Did we get anything?
-	if #results == 0 then
-		local embed = {
-			title = resultTitle,
-			description = "No results!",
-			color = color
-		}
-		return embed
-	end
-
-	-- Did we get more than max results?
-	if #results > resultMax then
-		-- Did we get way too many?
-		if #results > 100 then
-			local embed = {
-				title = "Error: Result overflow!",
-				description = "Got "..#results.." results. Search [the URL]("..githubUrl..") manually instead.",
-				color = color
-			}
-			return embed
-		end
-		pages = math.ceil(#results / resultMax )
-		for i = 1, #results do
-			if i > resultMax*(page-1) and i <= resultMax*(page) then
-				fields[#fields+1] = results[i]
-			end
-		end
-	else
-		fields = table.copy(results)
-	end
-	
-	local embed = {
-		title = resultTitle,
-		thumbnail = {
-			url = resultIcon,
-		},
-		description = "Results for [`"..term.."`]("..githubUrl.."):",
-		color = color,
-		footer = {
-			text = "Page "..page.."/"..pages
-		},
-		fields = fields
-	}
-
-	return embed
-end
-
--- Command functions
-local exe = {
-	-- Embed example
---[[	["embed"] = {
-		description = "Tests embed.",
-		exec = function(message)
-			message.channel:send({
-				embed = {
-					title = "title ~~(did you know you can have markdown here too?)~~",
-					description = "this supports [named links](https://discordapp.com) on top of the previously shown subset of markdown. ```\nyes, even code blocks```",
-					url = "https://discordapp.com",
-					color = 2200752,
-					timestamp = "2018-09-22T18:00:39.712Z",
-					footer = {
-						icon_url = "https://cdn.discordapp.com/embed/avatars/0.png",
-						text = "footer text"
-					},
-					thumbnail = {
-						url = "https://cdn.discordapp.com/embed/avatars/0.png"
-					},
-					image = {
-						url = "https://cdn.discordapp.com/embed/avatars/0.png"
-					},
-					author = {
-						name = "author name",
-						url = "https://discordapp.com",
-						icon_url = "https://cdn.discordapp.com/embed/avatars/0.png"
-					},
-					fields ={
-						{
-							name = "🤔",
-							value = "some of these properties have certain limits..."
-						},
-						{
-							name = "😱",
-							value = "try exceeding some of them!"
-						},
-						{
-							name = "🙄",
-							value = "an informative error should show up, and this view will remain as-is until all issues are fixed"
-						},
-						{
-							name = "<a:thonkang:219069250692841473>",
-							value = "these last two",
-							inline = true
-						},
-						{
-							name = "<a:thonkang:219069250692841473>",
-							value = "are inline fields",
-							inline = true
-						}
-					}
-				}
-			})
-		end
-	},]]
-	-- General Minetest command
-	["minetest"] = function(message)
-		local msg = message.content:gsub("^"..client.user.mentionString.." ", prefix)
+-- General Minetest command
+mbot.register_command("minetest", {
+	description = "General Minetest helpers.",
+	aliases = {"mt"},
+	func = function(message)
 		-- Get arguments
-		local args = msg:split(" ")
-		args[1] = args[1]:gsub(prefix, "")
+		local args = message.content:split(" ")
+		args[1] = args[1]:gsub(mbot.prefix, "")
 		-- List of info
 		local commands = {
 			-- If empty
@@ -200,7 +29,7 @@ local exe = {
 				fields = {
 					{
 						name = "Usage:",
-						value = "`"..prefix.."minetest <command>`"
+						value = "`"..mbot.prefix.."minetest <command>`"
 					},
 					{
 						name = "Avaliable commands:",
@@ -215,7 +44,7 @@ local exe = {
 					title = "Downloads for Minetest are located here.",
 					fields = {
 						{
-							name = "Use `"..prefix.."minetest install OShere` for OS-specific instructions.",
+							name = "Use `"..mbot.prefix.."minetest install OShere` for OS-specific instructions.",
 							value = "```\nlinux\nwindows\nmac\nandroid\nios```"
 						},
 					}
@@ -235,7 +64,7 @@ local exe = {
 						},
 						{
 							name = "Again, this will vary depending on your distribution. ",
-							value = "**[Google](https://www.google.com/) is your friend.**\n\nWhile slightly more involved, compiling works on any Linux distribution.\nSee `"..prefix.."minetest compile linux` for details."
+							value = "**[Google](https://www.google.com/) is your friend.**\n\nWhile slightly more involved, compiling works on any Linux distribution.\nSee `"..mbot.prefix.."minetest compile linux` for details."
 						},
 					}
 				},
@@ -295,7 +124,7 @@ local exe = {
 					title = "Compiling instructions are located here.",
 					fields = {
 						{
-							name = "Use `"..prefix.."minetest compile OShere` for OS-specific instructions.",
+							name = "Use `"..mbot.prefix.."minetest compile OShere` for OS-specific instructions.",
 							value = "```\nlinux\nwindows```"
 						},
 					}
@@ -371,7 +200,7 @@ local exe = {
 				-- Title URL (to instructions)
 				url = content.url or "",
 				title = content.title,
-				color = color,
+				color = mbot.color,
 				-- OS-specific icon
 				author = {
 					name = content.name,
@@ -381,9 +210,13 @@ local exe = {
 			}
 		})
 	end,
-	-- Server rules
-	["rules"] = function(message)
-		local msg = message.content:gsub("^"..client.user.mentionString.." ", prefix)
+})
+
+-- Server rules
+mbot.register_command("rules", {
+	description = "List rules.",
+	func = function(message)
+		local msg = message.content
 		-- Make sure we are a staff member
 		if not message.member:getPermissions():__tostring():find("kickMembers") then
 			message.channel:send({
@@ -392,7 +225,7 @@ local exe = {
 		end
 		-- Do we have rules for this server?
 		local servername = message.guild.name
-		local rules = servers[servername].rules
+		local rules = mbot.servers[servername].rules
 		if not rules then
 			return
 		end
@@ -415,10 +248,10 @@ local exe = {
 			end
 		else
 			-- Is this a valid rule number?
-			if not servers[servername].rules[tonumber(rule)] then
+			if not mbot.servers[servername].rules[tonumber(rule)] then
 				return
 			end
-			local rule_content = servers[servername].rules[tonumber(rule)]
+			local rule_content = mbot.servers[servername].rules[tonumber(rule)]
 			if rule_content[2] == "" then
 				rule_content[2] = "⠀"
 			end			
@@ -432,7 +265,7 @@ local exe = {
 		message.channel:send({
 			embed = {
 				title = title,
-				color = color,
+				color = mbot.color,
 				-- Get server icon
 				author = {
 					name = servername,
@@ -442,9 +275,14 @@ local exe = {
 			}
 		})
 	end,
-	-- ContentDB search
-	["cdb"] = function(message)
-		local msg = message.content:gsub("^"..client.user.mentionString.." ", prefix)
+})
+
+-- ContentDB search
+mbot.register_command("cdb", {
+	description = "Search the ContentDB",
+	aliases = {"mod", "modsearch", "search"},
+	func = function(message)
+		local msg = message.content
 		-- Get stuff after command
 		local termidx = msg:find(" ")
 		-- Is there a search term
@@ -455,7 +293,7 @@ local exe = {
 					url = "https://content.minetest.net/",
 					title = "**ContentDB**",
 					description = "Minetest's official content repository.",
-					color = color,
+					color = mbot.color,
 					thumbnail = {
 						url = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
 					},
@@ -485,7 +323,7 @@ local exe = {
 			message.channel:send({
 				embed = {
 					title = "Could not find any packages related to \""..term.."\".",
-					color = color,
+					color = mbot.color,
 				}
 			})
 			return
@@ -501,7 +339,7 @@ local exe = {
 			message.channel:send({
 				embed = {
 					title = "Could not find any packages related to \""..term.."\".",
-					color = color,
+					color = mbot.color,
 				}
 			})
 			return
@@ -535,7 +373,7 @@ local exe = {
 				url = "https://content.minetest.net/packages/"..author.."/"..name.."/",
 				title = "**"..title.."**",
 				description = "By "..author,
-				color = color,
+				color = mbot.color,
 				image = {
 					url = thumb
 				},
@@ -548,9 +386,14 @@ local exe = {
 			}
 		})
 	end,
-	-- Minetest Modding Book search
-	["modbook"] = function(message)
-		local msg = message.content:gsub("^"..client.user.mentionString.." ", prefix)
+})
+
+-- Minetest Modding Book search
+mbot.register_command("modbook", {
+	description = "Search the Modding Book",
+	aliases = {"book"},
+	func = function(message)
+		local msg = message.content
 		-- Get the search term
 		local termidx = msg:find(" ")
 		-- Get the sitemap
@@ -598,9 +441,9 @@ local exe = {
 						url = "https://avatars0.githubusercontent.com/u/2122943?s=460&v=4.png",
 					},
 					description = "By Rubenwardy",
-					color = color,
+					color = mbot.color,
 					footer = {
-						text = "Page 1/"..tostring(pages)
+						text = "Page 1/"..pages.." | modbook"
 					},
 					fields = results
 				}
@@ -680,7 +523,7 @@ local exe = {
 						thumbnail = {
 							url = "https://avatars0.githubusercontent.com/u/2122943?s=460&v=4.png",
 						},
-						color = color,
+						color = mbot.color,
 						fields = {
 							{
 								name = chapterstr..title.."**",
@@ -695,267 +538,12 @@ local exe = {
 			message.channel:send({
 				embed = {
 					title = "Could not find chapter \""..term.."\".",
-					color = color,
+					color = mbot.color,
 				}
 			})
 		end
 	end,
-	-- RTFM
-	["lua_api"] = function(message)
-		local msg = message.content:gsub("^"..client.user.mentionString.." ", prefix)
-		-- Get the search term
-		local termidx = msg:find(" ")
-		-- Do we have a term?
-		if not termidx then
-			-- If not, send some links
-			message.channel:send({
-				embed = {
-					title = "Lua API",
-					thumbnail = {
-						url = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
-					},
-					description = "Minetest Lua API Documentation",
-					color = color,
-					fields = {
-						{
-							name = "lua_api.txt with nice formatting",
-							value = "lua_api.txt but looks a little nicer. Located [here](https://rubenwardy.com/minetest_modding_book/lua_api.html)."
-						},
-						{
-							name = "lua_api.txt (stable, "..stable_version..")",
-							value = "Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/"..stable_version.."/doc/lua_api.txt)."
-						},
-						{
-							name = "lua_api.txt (bleeding, "..unstable_version..")",
-							value = "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/master/doc/lua_api.txt)."
-						},
-					}
-				}
-			})
-		else
-			-- Get the actual term
-			local term = msg:sub(termidx+1)
-			message.channel:send({
-				embed = searchUrl("https://github.com/minetest/minetest/blob/"..stable_version.."/doc/lua_api.txt", term, {
-					icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
-					title = "Minetest Lua API",
-					max = 6,
-				})
-			})
-		end
-	end,
-	-- GitHub file search
-	["githubsearch"] = function(message)
-		local msg = message.content:gsub("^"..client.user.mentionString.." ", prefix)
-		-- Do we have a search term
-		msg = msg:split(" ", 2)
-		local url = msg[2]
-		local term = msg[3]
-		if not url then
-			message.channel:send("Empty command!")
-		 	return
-		end
-		if not term then
-			message.channel:send("Empty search term!")
-		 	return
-		end
-		if not url:find("github%.com/") then
-			message.channel:send("Not a valid GitHub URL!")
-			return
-		end
-
-		message.channel:send({
-			embed = searchUrl(url, term, {
-				title = "GitHub Search",
-				max = 6,
-			})
-		})
-	end,
-}
-
--- Make the commands
-local commands = {
-	["ping"] = {
-		description = "Answers with pong.",
-		exec = function(message)
-			message.channel:send("Pong!")
-		end
-	},
-	["minetest"] = {
-		aliases = {"mt"},
-		description = "General Minetest helpers.",
-		exec = exe.minetest
-	},
-	["rules"] = {
-		description = "List rules.",
-		exec = exe.rules
-	},
-	["cdb"] = {
-		aliases = {"mod", "modsearch", "search"},
-		description = "Search the ContentDB",
-		exec = exe.cdb
-	},
-	["modbook"] = {
-		aliases = {"book"},
-		description = "Search the Modding Book",
-		exec = exe.modbook
-	},
-	["lua_api"] = {
-		aliases = {"api", "rtfm", "docs", "doc"},
-		description = "Get Lua API links",
-		exec = exe.lua_api
-	},
-	["githubsearch"] = {
-		aliases = {"ghsearch", "github"},
-		description = "Search a GitHub file",
-		exec = exe.githubsearch
-	},
-}
-
--- Add alias commands
-local aliases = {}
-for cmd in pairs(commands) do
-	if commands[cmd].aliases then
-		for _,aliase in pairs(commands[cmd].aliases) do
-			-- Dont include aliase field, add is_aliase
-			aliases[aliase] = {
-				is_aliase = true,
-				description = commands[cmd].description,
-				exec = commands[cmd].exec
-			}
-		end
-	end
-end
-for cmd in pairs(aliases) do
-	commands[cmd] = aliases[cmd]
-end
-aliases = nil
-
--- Bot loaded
-client:on("ready", function()
-	-- client.user is the path for bot
-	print("Logged in as ".. client.user.username)
-end)
-
--- On receive message
-client:on("messageCreate", function(message)
-	-- Is this sent by someone other than self?
-	if message.author.name ~= client.user.name then
-		-- Split all arguments into a table (turn mention into prefix)
-		local args = message.content:gsub("^"..client.user.mentionString.." ", prefix):split(" ")
-
-		if message.content == client.user.mentionString then
-			-- Send pingsock
-			message.channel:send("<"..botEmoji().pingsock..">")
-			return
-		end
-
-		-- Is it a command?
-		if not args[1]:find("^"..prefix) then
-			return
-		end
-
-		-- If so, execute it
-		local command = commands[args[1]:gsub("^"..prefix, "")]
-		if command then
-			command.exec(message)
-		end
-
-		-- If we get this far, see if the command is 'help'
-		if args[1] == prefix.."help" then
-			local fields = {}
-			-- Did we specify a command?
-			if args[2] then
-				local cmd = commands[args[2]]
-				if cmd then
-					local aliasestr = ""
-					-- Do we have aliases?
-					if cmd.aliases then
-						aliasestr = " | Aliases:"
-						-- If so, list them
-						for _,aliase in pairs(cmd.aliases) do
-							aliasestr = aliasestr.." "..aliase..","
-						end
-						aliasestr = aliasestr:gsub(",$", "")
-					end
-					fields[1] = {
-						name = "Command: `"..args[2].."`",
-						value = (cmd.description or "⠀")..aliasestr
-					}
-				else
-					-- Throw fail
-					message.channel:send({
-						embed = {
-							title = "Command \""..args[2].."\" does not exist.",
-							color = color,
-						}
-					})
-					return
-				end
-			else
-				-- Get all commands
-				for word, tbl in pairs(commands) do
-					local aliasestr = ""
-					-- Do we have aliases?
-					if tbl.aliases then
-						aliasestr = " | Aliases:"
-						-- If so, list them
-						for _,aliase in pairs(tbl.aliases) do
-							aliasestr = aliasestr.." "..aliase..","
-						end
-						aliasestr = aliasestr:gsub(",$", "")
-					end
-					-- Is this an aliase itself?
-					if not tbl.is_aliase then
-						-- Is this a dev command?
-						if not tbl.secret then
-							-- If not then add it
-							fields[#fields+1] = {
-								name = "Command: `"..word.."`",
-								value = (tbl.description or "⠀")..aliasestr
-							}
-						end
-					end
-				end
-			end
-			-- Send the message
-			message.channel:send({
-				embed = {
-					title = "MinetestBot Commands:",
-					thumbnail = {
-						url = client.user:getAvatarURL()
-					},
-					color = color,
-					fields = fields,
-					footer = {
-						text = "Prefix: "..botSettings.prefix
-					},
-				}
-			})
-		end
-	-- Otherwise its my own message
-	else
-		local embed = message.embed
-		-- Do we have an embed and footer with page count?
-		if embed then
-			if embed.footer then
-				local text = embed.footer.text
-				if text:find("Page") then
-					-- Are there enough pages to bother adding turners?
-					local page_total = text:match("%d*$")
-					if tonumber(page_total) ~= 1 then
-						message:addReaction("⬅")
-						message:addReaction("➡")
-					end
-				end
-			end
-		end
-	end
-end)
-
--- Page functions
-local pages = {
-	["Minetest Modding Book"] = function(page)
+	page = function(page)
 		local current_page = page.current
 		local results = {}
 		local fields = {}
@@ -988,98 +576,310 @@ local pages = {
 		end
 		return fields, "fields"
 	end,
-	["Minetest Lua API"] = function(page)
+})
+
+-- RTFM
+mbot.register_command("lua_api", {
+	description = "Get Lua API links",
+	aliases = {"api", "rtfm", "docs", "doc"},
+	func = function(message)
+		local msg = message.content
+		-- Get the search term
+		local termidx = msg:find(" ")
+		-- Do we have a term?
+		if not termidx then
+			-- If not, send some links
+			message.channel:send({
+				embed = {
+					title = "Lua API",
+					thumbnail = {
+						url = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
+					},
+					description = "Minetest Lua API Documentation",
+					color = mbot.color,
+					fields = {
+						{
+							name = "lua_api.txt with nice formatting",
+							value = "lua_api.txt but looks a little nicer. Located [here](https://rubenwardy.com/minetest_modding_book/lua_api.html)."
+						},
+						{
+							name = "lua_api.txt (stable, "..mbot.stable_version..")",
+							value = "Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/"..mbot.stable_version.."/doc/lua_api.txt)."
+						},
+						{
+							name = "lua_api.txt (bleeding, "..mbot.unstable_version..")",
+							value = "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/master/doc/lua_api.txt)."
+						},
+					}
+				}
+			})
+		else
+			-- Get the actual term
+			local term = msg:sub(termidx+1)
+			message.channel:send({
+				embed = mbot.searchUrl("https://github.com/minetest/minetest/blob/"..mbot.stable_version.."/doc/lua_api.txt", term, {
+					icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
+					title = "Minetest Lua API",
+					max = 6,
+				}, "lua_api")
+			})
+		end
+	end,
+	page = function(page)
 		local embed = page.embed
 		local desc = embed.description
 		local term = desc:sub(desc:find("`")+1, desc:find("`%]")-1)
-		return searchUrl("https://github.com/minetest/minetest/blob/0.4.17.1/doc/lua_api.txt", term, {
+		return mbot.searchUrl("https://github.com/minetest/minetest/blob/0.4.17.1/doc/lua_api.txt", term, {
 			icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
 			title = "Minetest Lua API",
 			max = 6,
-		}, page.current), "embed"
+		}, "lua_api", page.current), "embed"
 	end,
-	["GitHub Search"] = function(page)
+})
+
+-- GitHub file search
+mbot.register_command("githubsearch", {
+	description = "Search a GitHub file",
+	aliases = {"ghsearch", "github", "gh"},
+	func = function(message)
+		local msg = message.content
+		-- Do we have a search term
+		msg = msg:split(" ", 2)
+		local url = msg[2]
+		local term = msg[3]
+		if not url then
+			message.channel:send("Empty command!")
+			return
+		end
+		if not term then
+			message.channel:send("Empty search term!")
+			return
+		end
+		if not url:find("github%.com/") then
+			message.channel:send("Not a valid GitHub URL!")
+			return
+		end
+
+		message.channel:send({
+			embed = mbot.searchUrl(url, term, {
+				title = "GitHub Search",
+				max = 6,
+			}, "githubsearch")
+		})
+	end,
+	page = function(page)
 		local embed = page.embed
 		local desc = embed.description
 		local term = desc:sub(desc:find("`")+1, desc:find("`%]")-1)
 		local url = desc:sub(desc:find("%]%(")+2, desc:find("%)")-1)
-		return searchUrl(url, term, {
+		return mbot.searchUrl(url, term, {
 			title = "GitHub Search",
 			max = 6,
-		}, page.current), "embed"
+		}, "githubsearch", page.current), "embed"
 	end,
-}
+})
 
-local function page_turner(reaction, userId)
-	local message = reaction.message
-	local reactor = client:getUser(userId)
-	local embed = message.embed
-	local sender = message.author.name
-	if sender == client.user.name then
-		if reactor.name ~= client.user.name then
-			if embed then
-				if embed.footer then
-					local text = embed.footer.text
-					if text:find("Page") then
-						message:removeReaction(reaction, userId)
-						if reaction.emojiName == "⬅" or reaction.emojiName == "➡" then
-							if not pages[embed.title] then
-								return
-							end
-							local page_total = tonumber(text:match("%d*$"))
-							if page_total == 1 then
-								return
-							end
-							local current_page = text:match("%d*/"):gsub("/", "")
-							current_page = tonumber(current_page)
-							if reaction.emojiName == "➡" then
-								if current_page == page_total then
-									current_page = 1
-								else
-									current_page = current_page + 1
-								end
-							else
-								if current_page == 1 then
-									current_page = page_total
-								else
-									current_page = current_page - 1
-								end
-							end
-							local input, type = pages[embed.title]({
-								current = current_page,
-								embed = embed,
-							})
-							-- Edit the message
-							if type == "fields" then
-								message:setEmbed({
-									title = embed.title or nil,
-									thumbnail = embed.thumbnail or nil,
-									description = embed.description or nil,
-									color = color,
-									footer = {
-										text = "Page "..tostring(current_page).."/"..page_total
-									},
-									fields = input,
-								})
-							else
-								message:setEmbed(input)
-							end						
+mbot.register_command("lmgtfy", {
+	description = "Let Me Google That For You.",
+	aliases = {"google", "www"},
+	func = function(message)
+		local term = message.content:split(" ", 1)[2]
+		local args = term:split(" ", 2)
+		local mode = 0
+		local engine = "g"
+		for _, arg in ipairs(args) do
+			local en_op = arg:match("^-[gybd]$")
+			if en_op then
+				engine = en_op:sub(2)
+				term = term:gsub(en_op.." ", "", 1)
+			elseif arg:match("^-iie$") then
+				mode = 1
+				term = term:gsub("-iie ", "", 1)
+			elseif arg:match("^-s$") then
+				mode = 0
+				term = term:gsub("-s ", "", 1)
+			end
+		end
+		local footer = ""
+		if mode == 1 then
+			footer = "Internet Explainer"
+		end
+		local icons = {
+			g = "https://cdn4.iconfinder.com/data/icons/new-google-logo-2015/400/new-google-favicon-512.png",
+			y = "https://cdn1.iconfinder.com/data/icons/smallicons-logotypes/32/yahoo-512.png",
+			b = "https://cdn.icon-icons.com/icons2/1195/PNG/512/1490889706-bing_82538.png",
+			d = "https://cdn.icon-icons.com/icons2/844/PNG/512/DuckDuckGo_icon-icons.com_67089.png",
+		}
+		message.channel:send({
+			embed = {
+				title = "Google Search:",
+				thumbnail = {
+					url = icons[engine],
+				},
+				description = "[Search for `"..term.."`](http://lmgtfy.com/?s="..engine.."&iie="..mode.."&q="..url.escape(term)..").",
+				color = mbot.color,
+				footer = {
+					text = footer
+				}
+			}
+		})
+	end,
+})
+
+mbot.register_command("ping", {
+	description = "Answers with pong.",
+	func = function(message)
+		message.channel:send("🏓 Pong!")
+	end,
+})
+
+--[[ Message Handling ]]--
+
+-- Bot loaded
+client:on("ready", function()
+	-- client.user is the path for bot
+	print("Logged in as ".. client.user.username)
+end)
+
+-- On receive message
+client:on("messageCreate", function(message)
+	-- Is this sent by someone other than self?
+	if message.author.name ~= client.user.name then
+		if message.content == client.user.mentionString then
+			-- Send pingsock
+			message.channel:send("<"..mbot.botEmoji().pingsock..">")
+			return
+		end
+
+		-- Turn mention into prefix and split all arguments into a table 
+		local args = message.content:gsub("^"..client.user.mentionString.." ", mbot.prefix):split(" ")
+
+		-- Is it a command?
+		if not args[1]:find("^"..mbot.prefix) then
+			return
+		end
+
+		-- If so, execute it
+		command = args[1]:sub(2)
+		if mbot.aliases[command] then
+			command = mbot.aliases[command]
+		end
+		if mbot.commands[command] then
+			mbot.commands[command].func(message)
+		end
+			
+		-- If we get this far, see if the command is 'help'
+		if args[1] == mbot.prefix.."help" then
+			local fields = {}
+			-- Did we specify a command?
+			if args[2] then
+				if mbot.aliases[args[2]] then
+					args[2] = mbot.aliases[args[2]]
+				end
+				local cmd = mbot.commands[args[2]]
+				if cmd and not cmd.secret then
+					local infostr = ""
+					-- Do we have aliases?
+					if cmd.aliases then
+						infostr = "Aliases:"
+						-- If so, list them
+						for _,aliase in pairs(cmd.aliases) do
+							infostr = infostr.." "..aliase..","
 						end
+						infostr = infostr:sub(1,-2)
+					end
+					if cmd.description then
+						infostr = cmd.description.." | "..infostr
+					end
+					if infostr == "" then
+						infostr = "⠀"
+					end
+					fields[1] = {
+						name = "Command: `"..args[2].."`",
+						value = infostr
+					}
+				else
+					-- Throw fail
+					message.channel:send({
+						embed = {
+							title = "Command \""..args[2].."\" does not exist.",
+							color = mbot.color,
+						}
+					})
+					return
+				end
+			else
+				-- Get all commands
+				for cmd, def in pairs(mbot.commands) do
+					-- Is this a dev command?
+					if not def.secret then
+						local infostr = ""
+						-- Do we have aliases?
+						if def.aliases then
+							infostr = "Aliases:"
+							-- If so, list them
+							for _,aliase in pairs(def.aliases) do
+								infostr = infostr.." "..aliase..","
+							end
+							infostr = infostr:sub(1,-2)
+						end
+						if def.description then
+							infostr = def.description.." | "..infostr
+						end
+						if infostr == "" then
+							infostr = "⠀"
+						end
+						fields[#fields+1] = {
+							name = "Command: `"..cmd.."`",
+							value = infostr
+						}
+					end
+				end
+			end
+			-- Send the message
+			message.channel:send({
+				embed = {
+					title = "MinetestBot Commands:",
+					thumbnail = {
+						url = client.user:getAvatarURL()
+					},
+					color = mbot.color,
+					fields = fields,
+					footer = {
+						text = "Prefix: ".. mbot.prefix
+					},
+				}
+			})
+		end
+	-- Otherwise its my own message
+	else
+		local embed = message.embed
+		-- Do we have an embed and footer with page count?
+		if embed then
+			if embed.footer then
+				local text = embed.footer.text:gsub(" |", ""):split(" ")
+				-- Is this a scrolling message and can we work with it?
+				if text[1] == "Page" and text[3] and mbot.commands[text[3]] then
+					-- Are there enough pages to bother adding turners?
+					local page_total = text[2]:match("%d*$")
+					if tonumber(page_total) ~= 1 then
+						message:addReaction("⬅")
+						message:addReaction("➡")
 					end
 				end
 			end
 		end
 	end
-end
+end)
 
-client:on("reactionAdd", page_turner)
+client:on("reactionAdd", mbot.pageTurn)
 
 client:on("reactionAddUncached", function(channel, messageId, hash, userId)
 	local message = channel:getMessage(messageId)
 	if message then
 		local reaction = message.reactions:get(hash)
 		if reaction then
-			return page_turner(reaction, userId)
+			return mbot.pageTurn(reaction, userId)
 		end
 	end
 end)
