@@ -39,10 +39,6 @@ function string:split(delimiter, max)
 	return result
 end
 
-function string:test()
-	return "return: "..self
-end
-
 --[[ URL Handling ]]--
 local function readUrl(url)
 	local _, body = http.request("GET", url)
@@ -83,10 +79,10 @@ function mbot.searchUrl(url, term, def, id, page)
 	-- Read the API
 	for num, line in pairs(readUrl(rawUrl)) do
 		-- Add a field with the line number and a preview (link)
-		if line:lower():find(term:lower()) or line:lower():find(term:lower():gsub(" ", "_")) then
+		if line:lower():find(term:lower(), 1, true) or line:lower():find(term:lower():gsub(" ", "_"), 1, true) then
 			results[#results+1] = {
 				name = "Line "..tostring(num)..":",
-				value = "[```\n"..line:gsub("[%[%]]", "").."\n```]("..githubUrl.."#L"..num..")"
+				value = "[```\n"..line.."\n```]("..githubUrl.."#L"..num..")"
 			}
 		end
 	end
@@ -98,7 +94,7 @@ function mbot.searchUrl(url, term, def, id, page)
 		local embed = {
 			title = resultTitle,
 			description = "No results!",
-			color = color
+			color = mbot.color
 		}
 		return embed
 	end
@@ -110,7 +106,7 @@ function mbot.searchUrl(url, term, def, id, page)
 			local embed = {
 				title = "Error: Result overflow!",
 				description = "Got "..#results.." results. Search [the URL]("..githubUrl..") manually instead.",
-				color = color
+				color = mbot.color
 			}
 			return embed
 		end
@@ -130,7 +126,7 @@ function mbot.searchUrl(url, term, def, id, page)
 			url = resultIcon,
 		},
 		description = "Results for [`"..term.."`]("..githubUrl.."):",
-		color = color,
+		color = mbot.color,
 		footer = {
 			text = "Page "..page.."/"..pages.." | "..id
 		},

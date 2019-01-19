@@ -220,11 +220,18 @@ mbot.register_command("rules", {
 	aliases = {"r"},
 	func = function(message)
 		local msg = message.content
+		if not message.guild then
+			message.channel:send({
+				content = "This command must be run in a server!"
+			})
+			return
+		end
 		-- Make sure we are a staff member
 		if not message.member:getPermissions():__tostring():find("kickMembers") then
 			message.channel:send({
 				content = "You do not have the permissions to run this command!"
 			})
+			return
 		end
 		-- Do we have rules for this server?
 		local servername = message.guild.name
@@ -617,7 +624,7 @@ mbot.register_command("lua_api", {
 							value = "Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/"..mbot.stable_version.."/doc/lua_api.txt)."
 						},
 						{
-							name = "lua_api.txt (bleeding, "..mbot.unstable_version..")",
+							name = "lua_api.txt (unstable, "..mbot.unstable_version..")",
 							value = "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/master/doc/lua_api.txt)."
 						},
 					}
@@ -690,23 +697,28 @@ mbot.register_command("githubsearch", {
 	end,
 })
 
+-- Let Me Google That For You
 mbot.register_command("lmgtfy", {
 	description = "Let Me Google That For You.",
 	usage = "lmgtfy [-s|iie] [-g|y|d|b] <search term>",
 	aliases = {"google", "www"},
 	func = function(message)
+		-- Get message and arguments
 		local term = message.content:split(" ", 1)[2]
 		local args = term:split(" ", 2)
 		local mode = 0
 		local engine = "g"
 		for _, arg in ipairs(args) do
+			-- Did we get a specific search engine?
 			local en_op = arg:match("^-[gybd]$")
 			if en_op then
 				engine = en_op:sub(2)
 				term = term:gsub(en_op.." ", "", 1)
+			-- Should we enable the Internet Explainer?
 			elseif arg:match("^-iie$") then
 				mode = 1
 				term = term:gsub("-iie ", "", 1)
+			-- Default mode
 			elseif arg:match("^-s$") then
 				mode = 0
 				term = term:gsub("-s ", "", 1)
@@ -716,6 +728,7 @@ mbot.register_command("lmgtfy", {
 		if mode == 1 then
 			footer = "Internet Explainer"
 		end
+		-- Search engine logos
 		local icons = {
 			g = "https://cdn4.iconfinder.com/data/icons/new-google-logo-2015/400/new-google-favicon-512.png",
 			y = "https://cdn1.iconfinder.com/data/icons/smallicons-logotypes/32/yahoo-512.png",
@@ -738,6 +751,64 @@ mbot.register_command("lmgtfy", {
 	end,
 })
 
+-- Bot Info
+mbot.register_command("info", {
+	description = "Show MinetestBot info.",
+	func = function(message)
+		-- Get uptime
+		local t = mbot.uptime:getTime():toTable()
+		local check = {"weeks", "days", "hours", "minutes", "seconds"}
+		local ustr = ""
+		-- Format string
+		for i = 1, 5 do
+			local v = check[i]
+			if t[v] == 0 then
+				t[v] = nil
+			else
+				break
+			end
+		end
+		for i = 1, #check do
+			local v = check[i]
+			if t[v] then
+				local n = v
+				if t[v] == 1 then
+					n = n:sub(1,-2)
+				end
+				ustr = ustr..", "..t[v].." "..n:gsub("^%l", string.upper)
+			end
+		end
+
+		local creator = client:getUser("286032516467654656")
+
+		message.channel:send({
+			embed = {
+				title = "MinetestBot Info",
+				thumbnail = {
+					url = client.user:getAvatarURL(),
+				},
+				description = "Open-source, Lua-powered Discord bot providing useful Minetest features. Consider [donating](https://www.patreon.com/GreenXenith/).",
+				fields = {
+					{
+						name = "Sauce",
+						value = "<https://github.com/GreenXenith/minetestbot>"
+					},
+					{
+						name = "Uptime",
+						value = ustr:sub(3)
+					},
+				},
+				color = mbot.color,
+				footer = {
+					icon_url = creator.avatarURL,
+					text = "Created by "..creator.tag
+				}
+			}
+		})
+	end,
+})
+
+-- Bueller? Bueller?
 mbot.register_command("ping", {
 	description = "Answers with pong.",
 	func = function(message)
@@ -917,3 +988,5 @@ end)
 
 -- Run the bot :D
 client:run(botSettings.token)
+
+mbot.uptime = discordia.Stopwatch()
