@@ -82,7 +82,7 @@ function mbot.searchUrl(url, term, def, id, page)
 		if line:lower():find(term:lower(), 1, true) or line:lower():find(term:lower():gsub(" ", "_"), 1, true) then
 			results[#results+1] = {
 				name = "Line "..tostring(num)..":",
-				value = "[```\n"..line.."\n```]("..githubUrl.."#L"..num..")"
+				value = "[```\n"..line:gsub("[%[%]]", "").."\n```]("..githubUrl.."#L"..num..")"
 			}
 		end
 	end
