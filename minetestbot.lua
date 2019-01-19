@@ -728,21 +728,37 @@ mbot.register_command("lmgtfy", {
 		if mode == 1 then
 			footer = "Internet Explainer"
 		end
-		-- Search engine logos
-		local icons = {
-			g = "https://cdn4.iconfinder.com/data/icons/new-google-logo-2015/400/new-google-favicon-512.png",
-			y = "https://cdn1.iconfinder.com/data/icons/smallicons-logotypes/32/yahoo-512.png",
-			b = "https://cdn.icon-icons.com/icons2/1195/PNG/512/1490889706-bing_82538.png",
-			d = "https://cdn.icon-icons.com/icons2/844/PNG/512/DuckDuckGo_icon-icons.com_67089.png",
+		-- Search engine data
+		local engines = {
+			g = {
+				icon = "https://cdn4.iconfinder.com/data/icons/new-google-logo-2015/400/new-google-favicon-512.png",
+				name = "Google",
+				color = "#4081EC",
+			},
+			y = {
+				icon = "https://cdn1.iconfinder.com/data/icons/smallicons-logotypes/32/yahoo-512.png",
+				name = "Yahoo",
+				color = "#770094",
+			},
+			b = {
+				icon = "https://cdn.icon-icons.com/icons2/1195/PNG/512/1490889706-bing_82538.png",
+				name = "Bing",
+				color = "#ECB726",
+			},
+			d = {
+				icon = "https://cdn.icon-icons.com/icons2/844/PNG/512/DuckDuckGo_icon-icons.com_67089.png",
+				name = "DuckDuckGo",
+				color = "#D75531",
+			},
 		}
 		message.channel:send({
 			embed = {
-				title = "Google Search:",
+				title = engines[engine].name.." Search:",
 				thumbnail = {
-					url = icons[engine],
+					url = engines[engine].icon,
 				},
 				description = "[Search for `"..term.."`](http://lmgtfy.com/?s="..engine.."&iie="..mode.."&q="..url.escape(term)..").",
-				color = mbot.color,
+				color = mbot.getColor(engines[engine].color),
 				footer = {
 					text = footer
 				}
@@ -988,5 +1004,11 @@ end)
 
 -- Run the bot :D
 client:run(botSettings.token)
+
+client:setGame({
+	name = "no one.",
+	url = "https://www.minetest.net/",
+	type = 2,
+})
 
 mbot.uptime = discordia.Stopwatch()

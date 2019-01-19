@@ -7,7 +7,6 @@ function mbot.dbg(msg)
 end
 
 mbot.prefix = botSettings.prefix
-mbot.color = botSettings.color
 mbot.servers = botSettings.servers
 
 mbot.stable_version = "0.4.17.1"
@@ -16,6 +15,7 @@ mbot.unstable_version = "5.0"
 mbot.commands = {}
 mbot.aliases = {}
 
+-- Get custom emotes
 function mbot.botEmoji()
 	local list = {}
 	local emoteServer = client:getGuild("531580497789190145")
@@ -26,6 +26,7 @@ function mbot.botEmoji()
 	return list
 end
 
+-- Split function
 function string:split(delimiter, max)
 	local result = {}
 	for match in (self..delimiter):gmatch("(.-)"..delimiter) do
@@ -37,6 +38,25 @@ function string:split(delimiter, max)
 		self = self:sub(match:len()+2)
 	end
 	return result
+end
+
+-- Get RGB int
+function mbot.getColor(r, g, b)
+	if type(r) == "string" then
+		r = r:gsub("^#", "")
+		if not r:find("^%x%x%x%x%x%x$") then
+			return
+		end
+		r, g, b = tonumber("0x"..r:sub(1,2)), tonumber("0x"..r:sub(3,4)), tonumber("0x"..r:sub(5,6))
+	end
+	return 256 * 256 * r + 256 * g + b
+end
+
+-- Get main bot color
+if type(botSettings.color) == "table" then
+	mbot.color = mbot.getColor(botSettings.color.r, botSettings.color.g, botSettings.color.b)
+else
+	mbot.color = mbot.getColor(botSettings.color)
 end
 
 --[[ URL Handling ]]--

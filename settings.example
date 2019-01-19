@@ -2,7 +2,7 @@
 botSettings = {
 	token = "Bot ABCDEFG", -- Bot Token
 	prefix = "~", -- Command Prefix
-	color = 157200, -- Embed color (integer)
+	color = "#026610", -- Main embed color (hexidecimal or rgb {r=255,g=255,b=255} table)
 }
 
 -- Per-server settings
