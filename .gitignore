@@ -4,6 +4,7 @@
 # Except these
 !.gitignore
 !minetestbot.lua
-!util.lua
-!settings.example
 !README.md
+!relay.lua
+!settings.example
+!util.lua

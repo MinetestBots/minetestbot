@@ -15,3 +15,13 @@ botSettings.servers = {
 		bot_channel = "<#1234567890>", -- ID for bot command channel (currently unused)
 	},
 }
+
+-- Discord-IRC Relay
+botSettings.relay = {
+	enabled = false,
+	dm_enabled = true, -- Whether or not users can communicate with the server through Discord (default: true)
+	irc_channel = "#my-irc-channel",
+	minetest_user = "MyServerUser", -- Name of user IRC mod uses to connect (found in minetest.conf)
+	discord_channel = "1234567890", -- ID for IRC to relay with
+	webhook = "https://discordapp.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz1234567890", -- Webhook URL
+}

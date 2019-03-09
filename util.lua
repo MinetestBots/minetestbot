@@ -6,11 +6,18 @@ function mbot.dbg(msg)
 	discordia.Logger(4, tostring(os.date())):log(4, tostring(msg))
 end
 
-mbot.prefix = botSettings.prefix
-mbot.servers = botSettings.servers
+if not botSettings then
+	print("Bot configured incorrectly! Aborting.")
+	client:quit()
+	return
+end
 
-mbot.stable_version = "0.4.17.1"
-mbot.unstable_version = "5.0"
+for type, settings in pairs(botSettings) do
+	mbot[type] = settings
+end
+
+mbot.stable_version = "5.0.0"
+mbot.unstable_version = "5.1.0"
 
 mbot.commands = {}
 mbot.aliases = {}
@@ -73,7 +80,7 @@ local function readUrl(url)
 	return lines
 end
 
-function mbot.searchUrl(url, term, def, id, page)
+function mbot.searchUrl(user, url, term, def, id, page)
 	-- Init and defaults
 	local pages = 1
 	local results = {}
@@ -137,7 +144,7 @@ function mbot.searchUrl(url, term, def, id, page)
 			end
 		end
 	else
-		fields = table.copy(results)
+		fields = table.deepcopy(results)
 	end
 	
 	local embed = {
@@ -148,9 +155,10 @@ function mbot.searchUrl(url, term, def, id, page)
 		description = "Results for [`"..term.."`]("..githubUrl.."):",
 		color = mbot.color,
 		footer = {
+			icon_url =  user.avatarURL,
 			text = "Page "..page.."/"..pages.." | "..id
 		},
-		fields = fields
+		fields = fields,
 	}
 
 	return embed
@@ -163,6 +171,10 @@ function mbot.pageTurn(reaction, userId)
 	local sender = message.author.name
 	-- Was this a bot message, was it a normal user reacting, and does it have a footer to read?
 	if sender == client.user.name and reactor.name ~= client.user.name and embed and embed.footer then
+		local invoker = mbot.iconUser(embed)
+		if embed.provider then
+			mbot.dbg(embed.provider)
+		end
 		local text = embed.footer.text:gsub(" |", ""):split(" ")
 		-- Is this worth doing something with
 		if text[1] ~= "Page" then
@@ -170,12 +182,21 @@ function mbot.pageTurn(reaction, userId)
 		end
 		-- Clean up extras
 		message:removeReaction(reaction, userId)
-		-- Only 2 valid interaction emotes
-		if reaction.emojiName == "⬅" or reaction.emojiName == "➡" then
+		-- Only 3 valid interaction emotes
+		if reaction.emojiName == "⬅" or reaction.emojiName == "➡" or reaction.emojiName == "❌" then
 			-- No ID to work with
 			if not mbot.commands[text[3]] or not mbot.commands[text[3]].page then
 				return
 			end
+
+			-- Remove search
+			if reaction.emojiName == "❌" then
+				if (invoker and reactor.name == invoker.name) or message.guild:getMember(reactor.id):hasPermission("manageMessages") then
+					message:delete()
+				end
+				return
+			end
+
 			-- Get total and current
 			local page_total = tonumber(text[2]:match("%d+$"))
 			-- This only has 1 page, dont do anything
@@ -223,6 +244,14 @@ function mbot.pageTurn(reaction, userId)
 	end
 end
 
+--[[ Other ]]--
+function mbot.iconUser(embed)
+	if not embed.footer.icon_url then
+		return
+	end
+	return client:getUser(embed.footer.icon_url:match("avatars/%d+"):sub(9))
+end
+
 --[[ Command Registration ]]--
 function mbot.register_command(name, def)
 	-- Not valid
@@ -242,6 +271,7 @@ function mbot.register_command(name, def)
 		aliases = def.aliases,
 		page = def.page,
 		secret = def.secret,
+		perms = def.perms,
 	}
 	if def.aliases then
 		for _,alias in pairs(def.aliases) do

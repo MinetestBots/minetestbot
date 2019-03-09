@@ -5,11 +5,20 @@ _G.http = require("coro-http")
 _G.json = require("json")
 _G.url = require("socket.url")
 _G.discordia = require("discordia")
-_G.client = discordia.Client()
+_G.client = discordia.Client({
+	cacheAllMembers = true,
+	autoReconnect = true,
+})
+_G.irc = require("irc")
 discordia.extensions()
+--client.cacheAllMembers = true
 
 -- Get utils
 dofile("util.lua")
+
+if mbot.relay.enabled then
+	dofile("relay.lua")
+end
 
 --[[ Register Commands ]]--
 
@@ -459,6 +468,7 @@ mbot.register_command("modbook", {
 					description = "By Rubenwardy",
 					color = mbot.color,
 					footer = {
+						icon_url =  message.author.avatarURL,
 						text = "Page 1/"..pages.." | modbook"
 					},
 					fields = results
@@ -634,7 +644,7 @@ mbot.register_command("lua_api", {
 			-- Get the actual term
 			local term = msg:sub(termidx+1)
 			message.channel:send({
-				embed = mbot.searchUrl("https://github.com/minetest/minetest/blob/"..mbot.stable_version.."/doc/lua_api.txt", term, {
+				embed = mbot.searchUrl(message.author, "https://github.com/minetest/minetest/blob/"..mbot.stable_version.."/doc/lua_api.txt", term, {
 					icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
 					title = "Minetest Lua API",
 					max = 6,
@@ -646,7 +656,8 @@ mbot.register_command("lua_api", {
 		local embed = page.embed
 		local desc = embed.description
 		local term = desc:sub(desc:find("`")+1, desc:find("`%]")-1)
-		return mbot.searchUrl("https://github.com/minetest/minetest/blob/0.4.17.1/doc/lua_api.txt", term, {
+		local user = mbot.iconUser(embed)
+		return mbot.searchUrl(user, "https://github.com/minetest/minetest/blob/0.4.17.1/doc/lua_api.txt", term, {
 			icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
 			title = "Minetest Lua API",
 			max = 6,
@@ -679,7 +690,7 @@ mbot.register_command("githubsearch", {
 		end
 
 		message.channel:send({
-			embed = mbot.searchUrl(url, term, {
+			embed = mbot.searchUrl(message.author, url, term, {
 				title = "GitHub Search",
 				max = 6,
 			}, "githubsearch")
@@ -690,7 +701,8 @@ mbot.register_command("githubsearch", {
 		local desc = embed.description
 		local term = desc:sub(desc:find("`")+1, desc:find("`%]")-1)
 		local url = desc:sub(desc:find("%]%(")+2, desc:find("%)")-1)
-		return mbot.searchUrl(url, term, {
+		local user = mbot.iconUser(embed)
+		return mbot.searchUrl(user, url, term, {
 			title = "GitHub Search",
 			max = 6,
 		}, "githubsearch", page.current), "embed"
@@ -705,6 +717,10 @@ mbot.register_command("lmgtfy", {
 	func = function(message)
 		-- Get message and arguments
 		local term = message.content:split(" ", 1)[2]
+		if not term then
+			message.channel:send("Empty command!")
+			return
+		end
 		local args = term:split(" ", 2)
 		local mode = 0
 		local engine = "g"
@@ -864,6 +880,13 @@ client:on("messageCreate", function(message)
 			command = mbot.aliases[command]
 		end
 		if mbot.commands[command] then
+			if mbot.commands[command].perms then
+				for _, perm in pairs(mbot.commands[command].perms) do
+					if not message.author:hasPermission(perm) then
+						return
+					end
+				end
+			end
 			mbot.commands[command].func(message)
 		end
 			
@@ -984,6 +1007,7 @@ client:on("messageCreate", function(message)
 						message:addReaction("⬅")
 						message:addReaction("➡")
 					end
+					message:addReaction("❌")
 				end
 			end
 		end
