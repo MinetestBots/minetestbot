@@ -156,7 +156,7 @@ client:on("messageCreate", function(message)
 		-- Get nickname, if any
 		local member = message.member or message.author
 		-- Send commands from Discord to IRC for server to catch
-		if message.content:match("^"..relay.minetest_user..", ") then
+		if message.content:lower():match("^"..relay.minetest_user:lower()..",") then
 			c:say(relay.irc_channel, "Command sent by "..member.name..":")
 			c:say(relay.irc_channel, simplifyMarkdown(message.content))
 		else
