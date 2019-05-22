@@ -657,7 +657,7 @@ mbot.register_command("lua_api", {
 		local desc = embed.description
 		local term = desc:sub(desc:find("`")+1, desc:find("`%]")-1)
 		local user = mbot.iconUser(embed)
-		return mbot.searchUrl(user, "https://github.com/minetest/minetest/blob/0.4.17.1/doc/lua_api.txt", term, {
+		return mbot.searchUrl(user, "https://github.com/minetest/minetest/blob/"..mbot.stable_version.."/doc/lua_api.txt", term, {
 			icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
 			title = "Minetest Lua API",
 			max = 6,
