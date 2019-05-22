@@ -16,8 +16,8 @@ for type, settings in pairs(botSettings) do
 	mbot[type] = settings
 end
 
-mbot.stable_version = "5.0.0"
-mbot.unstable_version = "5.1.0"
+mbot.stable_version = "5.0.1"
+mbot.unstable_version = "5.1.0-dev"
 
 mbot.commands = {}
 mbot.aliases = {}
