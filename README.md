@@ -5,7 +5,7 @@ Uses NodeJS and `discord.js`.
 
 To use the bot, run `node .` in the bot directory.  
 
-MinetestBot demands a ~~sacrifice~~ `config.json`. See `config.example`.  
+MinetestBot demands a ~~sacrifice~~ `config.json`. See `config.json.example`.  
 
 ### Todo (PRs welcome) ###
 * Vote starter
