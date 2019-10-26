@@ -8,9 +8,10 @@ To use the bot, run `node .` in the bot directory.
 MinetestBot demands a ~~sacrifice~~ `config.json`. See `config.json.example`.  
 
 ### Todo (PRs welcome) ###
-* Vote starter
+* Better CDB search
+* ~~Vote starter~~
 * Serverlist searcher/parser
-* Metric/US value conversion command
+* Metric/Imperial conversion command
 * Word definition
 * Forum search
 
