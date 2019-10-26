@@ -1,10 +1,4 @@
-# Ignore everything
-*
-
-# Except these
-!.gitignore
-!minetestbot.lua
-!README.md
-!relay.lua
-!settings.example
-!util.lua
+config.json
+*-lock.json
+node_modules/
+legacy/

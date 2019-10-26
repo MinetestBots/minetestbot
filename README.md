@@ -1,16 +1,19 @@
 # MinetestBot for Discord #
+_MinetestBot and it's author(s) are in no way affiliated with the IRC MinetestBot._  
 
-Discordia and Luvit are required to run this bot.
-See the [Discordia README](https://github.com/SinisterRectus/Discordia/blob/master/README.md) for instructions on insalling Discordia and Luvit.
+Uses NodeJS and `discord.js`.  
 
-To run the bot, use `/path/to/luvit/executable/minetestbot.lua`.
+To use the bot, run `node .` in the bot directory.  
 
-A `settings.lua` file is required for the bot to run. See `settings.example`.
+MinetestBot demands a ~~sacrifice~~ `config.json`. See `config.example`.  
 
 ### Todo (PRs welcome) ###
 * Vote starter
 * Serverlist searcher/parser
 * Metric/US value conversion command
-* `minetest.conf.example` search
-* Define
+* Word definition
 * Forum search
+
+Might be missing `;` everywhere.  
+
+This used to be written in Lua, but Luvit is garbage.  

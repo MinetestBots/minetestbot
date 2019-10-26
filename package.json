@@ -1,0 +1,13 @@
+{
+	"name": "minetestbot",
+	"version": "2.0.0",
+	"description": "Discord bot with useful Minetest commands.",
+	"main": "minetestbot.js",
+	"dependencies": {
+		"discord-js": "^11.5.1",
+		"request": "^2.88.1",
+		"sync-request": "^6.1.0"
+	},
+	"author": "GreenXenith",
+	"license": "MIT"
+}
