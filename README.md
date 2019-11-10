@@ -3,9 +3,20 @@ _MinetestBot and it's author(s) are in no way affiliated with the IRC MinetestBo
 
 Uses NodeJS and `discord.js`.  
 
-To use the bot, run `node .` in the bot directory.  
+## Installation ##
+
+```
+git clone https://github.com/GreenXenith/minetestbot.git
+cd minetestbot
+npm install
+``` 
 
 MinetestBot demands a ~~sacrifice~~ `config.json`. See `config.json.example`.  
+
+## Usage ##
+
+To use the bot, run `node .` in the bot directory.  
+I recommend you use a cron job or systemd service  
 
 ### Todo (PRs welcome) ###
 * Better CDB search
@@ -15,6 +26,6 @@ MinetestBot demands a ~~sacrifice~~ `config.json`. See `config.json.example`.
 * Word definition
 * Forum search
 
-Might be missing `;` everywhere.  
+Might be missing `;` everywhere, or have too many.  
 
 This used to be written in Lua, but Luvit is garbage.  
