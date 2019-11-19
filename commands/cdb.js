@@ -1,6 +1,34 @@
 const {color} = require("../config.js");
 const request = require("request");
 
+function score(term, check, add) {
+	let s = 0;
+	add = add || 0;
+	term = term.toLowerCase();
+	check = check.toLowerCase();
+
+	if (check === term) {
+		s = 2;
+	} else if (check.match(term)) {
+		s = 1;
+	}
+
+	return s + add;
+}
+
+function heuristics(body, term) {
+	res = [];
+	body.forEach(function(v, k) {
+		res.push([
+			score(term, v.name, 2) + score(term, v.title, 1) + score(term, v.short_description || ""), k
+		]);
+	})
+	res.sort(function(a, b) {
+		return b[0] - a[0];
+	})
+	return body[res[0][1]];
+}
+
 module.exports = {
 	name: "cdb",
 	aliases: ["contentdb", "mod", "modsearch", "search"],
@@ -27,7 +55,7 @@ module.exports = {
 		} else {
 			const term = args.join(" ");
 			request({
-				url: `https://content.minetest.net/api/packages/?q=${term}&lucky=1`,
+				url: `https://content.minetest.net/api/packages/?q=${term}`,
 				json: true,
 			}, function(err, res, body) {
 				if (!body.length) {
@@ -37,7 +65,7 @@ module.exports = {
 					};
 					message.channel.send({embed: embed});
 				} else {
-					const meta = body[0];
+					const meta = heuristics(body, term);
 					request({
 						url: `https://content.minetest.net/api/packages/${meta.author}/${meta.name}/`,
 						json: true,
