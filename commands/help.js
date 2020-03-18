@@ -73,12 +73,16 @@ module.exports = {
 			},
 		};
 
-		return message.author.send({embed: embed}).then(() => {
-			if (message.channel.type === "dm") return;
-			message.reply("I\'ve sent you a DM with all my commands.");
-		}).catch(error => {
-			console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
-			message.reply("help DM couldn't be sent, do you have DMs disabled?");
-		});
+		if (args.length) {
+			message.channel.send({embed: embed});
+		} else {
+			return message.author.send({embed: embed}).then(() => {
+				if (message.channel.type === "dm") return;
+				message.reply("I\'ve sent you a DM with all my commands.");
+			}).catch(error => {
+				console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
+				message.reply("help DM couldn't be sent, do you have DMs disabled?");
+			});
+		}
 	},
 };
