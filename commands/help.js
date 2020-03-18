@@ -64,7 +64,7 @@ module.exports = {
 			color: color,
 			title: `${client.user.username} Commands:`,
 			thumbnail: {
-				url: client.user.avatarURL,
+				url: client.user.avatarURL(),
 			},
 			fields: fields,
 			timestamp: new Date(),

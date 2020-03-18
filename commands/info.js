@@ -34,13 +34,13 @@ module.exports = {
 	description: "Bot info.",
 	execute(message) {
 		const client = message.client;
-		const creator = client.users.get("286032516467654656");
+		const creator = client.users.cache.get("286032516467654656");
 		const embed = {
 			color: color,
 			title: `${client.user.username} Info`,
 			description: "Open-source, JavaScript-powered, Discord bot providing useful Minetest features. Consider [donating](https://www.patreon.com/GreenXenith/).",
 			thumbnail: {
-				url: client.user.avatarURL,
+				url: client.user.avatarURL(),
 			},
 			fields: [
 				{
@@ -55,7 +55,7 @@ module.exports = {
 			timestamp: new Date(),
 			footer: {
 				text: `Created by ${creator.tag}`,
-				icon_url: creator.avatarURL,
+				icon_url: creator.avatarURL(),
 			},
 		};
 

@@ -127,7 +127,7 @@ client.on("messageReactionAdd", (reaction, user) => {
 
 	// (message, current page, total pages, reaction event)
 	command.execute(message, page, total, event);
-	reaction.remove(user);
+	reaction.users.remove(user);
 });
 
 // Launch

@@ -13,7 +13,7 @@ module.exports = {
 	},
 	pageFooter: function(message, command, page, total) {
 		return {
-			icon_url: message.author.avatarURL,
+			icon_url: message.author.avatarURL(),
 			text: `Page ${page} / ${total} | ${command}`
 		};
 	},
