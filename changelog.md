@@ -6,3 +6,9 @@
 
 ### 2.0.1: March 18, 2020
 - Update discord.js to version 12
+
+### 2.1.0: March 18, 2020
+- Fix pingsock
+- Fix various search result issues
+- Only DM help if list
+- Other discord.js updates
