@@ -9,5 +9,9 @@
 		"sync-request": "^6.1.0"
 	},
 	"author": "GreenXenith",
-	"license": "MIT"
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/GreenXenith/minetestbot.git"
+	}
 }
