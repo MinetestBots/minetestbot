@@ -43,7 +43,7 @@ let mentionString = "";
 
 client.once("ready", () => {
 	console.log(`Logged in as ${client.user.tag}.`);
-	mentionString = `<@${client.user.id}>`
+	mentionString = `<@!${client.user.id}>`
 
 	client.user.setActivity("no one.", {type: "LISTENING"});
 });
@@ -51,7 +51,7 @@ client.once("ready", () => {
 client.on("message", async message => {
 	// Pingsock >:/
 	if (message.content === mentionString) {
-		const pingsock = client.guilds.get("531580497789190145").emojis.find(emoji => emoji.name === "pingsock");
+		const pingsock = client.guilds.cache.get("531580497789190145").emojis.cache.find(emoji => emoji.name === "pingsock");
 		message.channel.send(`${pingsock}`);
 		return;
 	}
