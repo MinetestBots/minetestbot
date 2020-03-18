@@ -53,7 +53,7 @@ module.exports = {
 				thumbnail: minetest_logo,
 			}, term, async function(embed, results) {
 				let turn = true;
-				if (results.length > 100) turn = false;
+				if (results.length <= pageSize || results.length > 100) turn = false;
 				const msg = await message.channel.send({embed: embed});
 				pages.addControls(msg, turn);
 			});

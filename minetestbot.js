@@ -85,17 +85,11 @@ client.on("message", async message => {
 client.on("messageReactionAdd", (reaction, user) => {
 	const message = reaction.message;
 	if (message.author != client.user || user == client.user) return; // Message author must be bot; Reactor must not be bot
+	reaction.users.remove(user);
 
+	if (!reaction.me) return;
 	if (!message.embeds.length) return;
 	const embed = message.embeds[0];
-
-	if (!embed.footer) return;
-	if (!(new RegExp(/^Page /).test(embed.footer.text))) return;
-	const matches = embed.footer.text.match(/^Page (\d+) ?\/ ?(\d+) \| (.+)/);
-	const commandName = matches[3];
-	const command = client.pages.get(commandName)
-
-	if (!command || !reaction.me) return;
 
 	let event = ""; // Unused internally; Up to commands to utilize if needed
 	for (const [action, name] of Object.entries(client.pageControls)) {
@@ -104,30 +98,40 @@ client.on("messageReactionAdd", (reaction, user) => {
 			break;
 		}
 	}
+
 	if (event === "") return;
+	if (event === "exit") {
+		if (!embed.footer ||
+				embed.footer.iconURL().match(/avatars\/(\d+)/)[1] == user.id ||
+				message.guild.member(user).hasPermission("MANAGE_MESSAGES"))
+			message.delete();
+		return;
+	} else {
+		if (!embed.footer) return;
+		if (!(new RegExp(/^Page /).test(embed.footer.text))) return; // Nothing to do if no pages
 
-	let page = parseInt(matches[1]);
-	const total = parseInt(matches[2]);
+		const matches = embed.footer.text.match(/^Page (\d+) ?\/ ?(\d+) \| (.+)/);
+		const commandName = matches[3];
+		const command = client.pages.get(commandName)
+		if (!command) return;
 
-	switch(event) {
-		case "next":
-			page++;
-			if (page > total) page = 1;
-			break;
-		case "prev":
-			page--;
-			if (page < 1) page = total;
-			break;
-		case "exit":
-			const authorID = embed.footer.iconURL.match(/avatars\/(\d+)/)[1];
-			if (authorID == user.id ||
-				message.guild.member(user).hasPermission("MANAGE_MESSAGES")) message.delete();
-			return;
+		let page = parseInt(matches[1]);
+		const total = parseInt(matches[2]);
+
+		switch(event) {
+			case "next":
+				page++;
+				if (page > total) page = 1;
+				break;
+			case "prev":
+				page--;
+				if (page < 1) page = total;
+				break;
+		}
+
+		// (message, current page, total pages, reaction event)
+		command.execute(message, page, total, event);
 	}
-
-	// (message, current page, total pages, reaction event)
-	command.execute(message, page, total, event);
-	reaction.users.remove(user);
 });
 
 // Launch

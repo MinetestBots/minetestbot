@@ -34,6 +34,11 @@ module.exports = {
 					description: `Got ${results.length} results. Search [the page](${config.url.display}) manually instead.`,
 					color: color
 				};
+			} else if (results.length == 0) {
+				embed = {
+					title: `Could not find any results related to "${term}".`,
+					color: color,
+				};
 			} else {
 				for (let i = (config.page - 1) * config.pageSize; i < (config.page * config.pageSize); i++) {
 					const res = results[i];
