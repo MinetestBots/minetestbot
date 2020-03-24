@@ -18,7 +18,7 @@ module.exports = {
 		};
 	},
 	getPage: function(command, message, config, term, func) {
-		request(`${config.url.search}`, async function (err, res, body) {
+		request(`${config.url.search}`, async function(err, res, body) {
 			if (err || res.statusCode != 200) {
 				message.channel.send(":warning: Something went wrong.");
 				return;

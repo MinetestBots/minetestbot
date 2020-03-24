@@ -21,7 +21,7 @@ client.pageControls = {
 };
 
 // Find term function
-client.searchText = function (text, term) {
+client.searchText = function(text, term) {
 	let results = [];
 	const lines = text.split("\n");
 	for (let i = 0; i < lines.length; i++) {
@@ -82,7 +82,7 @@ client.on("message", async message => {
 				headers: {
 					"User-Agent": "Minetest Bot"
 				}
-			}, function (err, res, pkg) {
+			}, function(err, res, pkg) {
 				if (pkg.url) {
 					sendGitHubEmbedReply(message, pkg);
 				}
