@@ -2,9 +2,7 @@ const fs = require("fs");
 const Discord = require("discord.js");
 const {prefix, token} = require('./config.json');
 const request = require("request");
-const {
-	sendGitHubEmbedReply
-} = require("./common.js");
+const {sendGitHubEmbedReply} = require("./common.js");
 
 // Error if missing configuration
 if (!token || !prefix) {
