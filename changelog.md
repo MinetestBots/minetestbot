@@ -12,3 +12,8 @@
 - Fix various search result issues
 - Only DM help if list
 - Other discord.js updates
+
+### 2.2.0: March 24, 2020
+- Add #number references for pull requests and issues
+- Add ~pr command for searching pull requests
+- Add ~issue command for searching issues

@@ -1,6 +1,7 @@
 const {color} = require("./config.js");
 const max_length = 256;
 const {MessageEmbed} = require("discord.js");
+const request = require("request");
 
 function sendGitHubEmbedReply(message, issue) {
     let embed = new MessageEmbed();
@@ -18,6 +19,27 @@ function sendGitHubEmbedReply(message, issue) {
         embed: embed
     });
 }
+
+function gitHubSearchCommand(def, type) {
+    def.execute = function(message, args) {
+        if (args.length === 0) {
+            message.channel.send({embed: {color: color, title: "Empty search term."}})
+        } else {
+            request({
+                url: `https://api.github.com/search/issues?q=is:${type}+repo:minetest/minetest+${encodeURI(args.join(" "))}`,
+                json: true,
+                headers: {
+                    "User-Agent": "Minetest Bot"
+                }
+            }, function(err, res, pkg) {
+                sendGitHubEmbedReply(message, pkg.items[0]);
+            });
+        }
+    }
+    return def;
+}
+
 module.exports = {
-    sendGitHubEmbedReply
+    sendGitHubEmbedReply,
+    gitHubSearchCommand
 };
