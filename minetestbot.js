@@ -1,9 +1,6 @@
 const fs = require("fs");
 const Discord = require("discord.js");
-const {
-	prefix,
-	token
-} = require('./config.json');
+const {prefix, token} = require('./config.json');
 const request = require("request");
 const {
 	sendGitHubEmbedReply
@@ -40,7 +37,7 @@ client.searchText = function (text, term) {
 const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
 for (const file of commandFiles) {
 	let command = require(`./commands/${file}`);
-	if (typeof (command) === "function") command = command(client); // Pass client if needed
+	if (typeof(command) === "function") command = command(client); // Pass client if needed
 	client.commands.set(command.name, command);
 
 	if (command.page) client.pages.set(command.name, command.page);
@@ -52,9 +49,7 @@ client.once("ready", () => {
 	console.log(`Logged in as ${client.user.tag}.`);
 	mentionString = `<@!${client.user.id}>`
 
-	client.user.setActivity("no one.", {
-		type: "LISTENING"
-	});
+	client.user.setActivity("no one.", {type: "LISTENING"});
 });
 
 client.on("message", async message => {

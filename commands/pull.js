@@ -1,6 +1,4 @@
-const {
-    sendGitHubEmbedReply
-} = require("../common.js");
+const {sendGitHubEmbedReply} = require("../common.js");
 const request = require("request");
 module.exports = {
     name: "pull",

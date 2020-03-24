@@ -1,6 +1,4 @@
-const {
-    color
-} = require("./config.js");
+const {color} = require("./config.js");
 const max_length = 256;
 const {
     MessageEmbed
