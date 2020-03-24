@@ -1,8 +1,6 @@
 const {color} = require("./config.js");
 const max_length = 256;
-const {
-    MessageEmbed
-} = require("discord.js");
+const {MessageEmbed} = require("discord.js");
 
 function sendGitHubEmbedReply(message, issue) {
     let embed = new MessageEmbed();
