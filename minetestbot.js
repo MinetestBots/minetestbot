@@ -1,6 +1,8 @@
 const fs = require("fs");
 const Discord = require("discord.js");
 const {prefix, token} = require('./config.json');
+const request = require("request");
+const {sendGitHubEmbedReply} = require("./common.js");
 
 // Error if missing configuration
 if (!token || !prefix) {
@@ -58,24 +60,35 @@ client.on("message", async message => {
 
 	if (message.author.bot) return;
 
-	// Try prefix first, then mentionString (could probably be done better)
-	let p = prefix;
-	if (!message.content.startsWith(p)) {
-		p = `${mentionString} `;
-		if (!message.content.startsWith(p)) return;
-	}
-
-	const args = message.content.slice(p.length).trim().split(/ +/g);
-	const commandName = args.shift().toLowerCase();
-
-	const command = client.commands.get(commandName)
-		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-
-	if (!command) return;
-
 	try {
-		command.execute(message, args, client);
-	} catch(error) {
+		let p;
+		if (message.content.startsWith(p = prefix) || message.content.startsWith(p = mentionString)) {
+			const args = message.content.slice(p.length).trim().split(/ +/g);
+			const commandName = args.shift().toLowerCase();
+
+			const command = client.commands.get(commandName) ||
+				client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+			if (command) {
+				command.execute(message, args, client);
+				return;
+			}
+		}
+		// No valid command, look for #d+, referencing pulls or issues
+		for (const match of message.content.matchAll(/#(\d+)/g)) {
+			const number = match[1];
+			request({
+				url: "https://api.github.com/repos/minetest/minetest/issues/" + number,
+				json: true,
+				headers: {
+					"User-Agent": "Minetest Bot"
+				}
+			}, function(err, res, pkg) {
+				if (pkg.url) {
+					sendGitHubEmbedReply(message, pkg);
+				}
+			});
+		}
+	} catch (error) {
 		console.error(error);
 		message.channel.send(":warning: Yikes, something broke.");
 	}
@@ -102,8 +115,8 @@ client.on("messageReactionAdd", (reaction, user) => {
 	if (event === "") return;
 	if (event === "exit") {
 		if (!embed.footer ||
-				embed.footer.iconURL().match(/avatars\/(\d+)/)[1] == user.id ||
-				message.guild.member(user).hasPermission("MANAGE_MESSAGES"))
+			embed.footer.iconURL().match(/avatars\/(\d+)/)[1] == user.id ||
+			message.guild.member(user).hasPermission("MANAGE_MESSAGES"))
 			message.delete();
 		return;
 	} else {
@@ -118,7 +131,7 @@ client.on("messageReactionAdd", (reaction, user) => {
 		let page = parseInt(matches[1]);
 		const total = parseInt(matches[2]);
 
-		switch(event) {
+		switch (event) {
 			case "next":
 				page++;
 				if (page > total) page = 1;
