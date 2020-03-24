@@ -1,8 +1,13 @@
 const fs = require("fs");
 const Discord = require("discord.js");
-const {prefix, token} = require('./config.json');
+const {
+	prefix,
+	token
+} = require('./config.json');
 const request = require("request");
-const {sendGitHubEmbedReply} = require("./common.js");
+const {
+	sendGitHubEmbedReply
+} = require("./common.js");
 
 // Error if missing configuration
 if (!token || !prefix) {
@@ -21,7 +26,7 @@ client.pageControls = {
 };
 
 // Find term function
-client.searchText = function(text, term) {
+client.searchText = function (text, term) {
 	let results = [];
 	const lines = text.split("\n");
 	for (let i = 0; i < lines.length; i++) {
@@ -35,7 +40,7 @@ client.searchText = function(text, term) {
 const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
 for (const file of commandFiles) {
 	let command = require(`./commands/${file}`);
-	if (typeof(command) === "function") command = command(client); // Pass client if needed
+	if (typeof (command) === "function") command = command(client); // Pass client if needed
 	client.commands.set(command.name, command);
 
 	if (command.page) client.pages.set(command.name, command.page);
@@ -47,7 +52,9 @@ client.once("ready", () => {
 	console.log(`Logged in as ${client.user.tag}.`);
 	mentionString = `<@!${client.user.id}>`
 
-	client.user.setActivity("no one.", {type: "LISTENING"});
+	client.user.setActivity("no one.", {
+		type: "LISTENING"
+	});
 });
 
 client.on("message", async message => {
@@ -66,8 +73,8 @@ client.on("message", async message => {
 			const args = message.content.slice(p.length).trim().split(/ +/g);
 			const commandName = args.shift().toLowerCase();
 
-			const command = client.commands.get(commandName)
-				|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+			const command = client.commands.get(commandName) ||
+				client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 			if (command) {
 				command.execute(message, args, client);
 				return;
@@ -77,18 +84,18 @@ client.on("message", async message => {
 		for (const match of message.content.matchAll(/#(\d+)/g)) {
 			const number = match[1];
 			request({
-				url: "https://api.github.com/repos/minetest/minetest/issues/"+number,
+				url: "https://api.github.com/repos/minetest/minetest/issues/" + number,
 				json: true,
 				headers: {
 					"User-Agent": "Minetest Bot"
 				}
-			}, function(err, res, pkg) {
+			}, function (err, res, pkg) {
 				if (pkg.url) {
 					sendGitHubEmbedReply(message, pkg);
 				}
 			});
 		}
-	} catch(error) {
+	} catch (error) {
 		console.error(error);
 		message.channel.send(":warning: Yikes, something broke.");
 	}
@@ -115,8 +122,8 @@ client.on("messageReactionAdd", (reaction, user) => {
 	if (event === "") return;
 	if (event === "exit") {
 		if (!embed.footer ||
-				embed.footer.iconURL().match(/avatars\/(\d+)/)[1] == user.id ||
-				message.guild.member(user).hasPermission("MANAGE_MESSAGES"))
+			embed.footer.iconURL().match(/avatars\/(\d+)/)[1] == user.id ||
+			message.guild.member(user).hasPermission("MANAGE_MESSAGES"))
 			message.delete();
 		return;
 	} else {
@@ -131,7 +138,7 @@ client.on("messageReactionAdd", (reaction, user) => {
 		let page = parseInt(matches[1]);
 		const total = parseInt(matches[2]);
 
-		switch(event) {
+		switch (event) {
 			case "next":
 				page++;
 				if (page > total) page = 1;
