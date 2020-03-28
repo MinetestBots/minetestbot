@@ -1,3 +1,8 @@
+const {valid_issue_states} = require("./config.json");
+const valid_issue_states_lookup = {}
+for (const state of valid_issue_states) {
+	valid_issue_states_lookup[state] = true;
+}
 const {color} = require("./config.js");
 const max_length = 256;
 const {MessageEmbed} = require("discord.js");
@@ -5,6 +10,9 @@ const request = require("request");
 
 function sendGitHubEmbedReply(message, issue) {
 	let embed = new MessageEmbed();
+	if (!valid_issue_states_lookup[issue.state]) {
+		return;
+	}
 	embed.setURL(issue.html_url);
 	embed.setTitle(`**${issue.title.trim()}**`);
 	embed.setAuthor(issue.user.login, issue.user.avatar_url, issue.user.html_url);

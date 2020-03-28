@@ -1,5 +1,7 @@
 {
 	"prefix": "!",
 	"token": "Bot ABCDEFGHIJKLMNOPQRSTUVWXYZ.1234567890",
-	"color": "#FF0000"
+	"color": "#FF0000",
+	"reference_min_number": 99,
+	"valid_issue_states": ["open"]
 }

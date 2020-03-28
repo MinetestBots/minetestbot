@@ -1,6 +1,7 @@
 const fs = require("fs");
 const Discord = require("discord.js");
-const {prefix, token} = require('./config.json');
+const {prefix, token, reference_min_num} = require('./config.json');
+const reference_min_number = reference_min_num || 0
 const request = require("request");
 const {sendGitHubEmbedReply} = require("./common.js");
 
@@ -74,19 +75,32 @@ client.on("message", async message => {
 			}
 		}
 		// No valid command, look for #d+, referencing pulls or issues
-		for (const match of message.content.matchAll(/#(\d+)/g)) {
-			const number = match[1];
-			request({
-				url: "https://api.github.com/repos/minetest/minetest/issues/" + number,
-				json: true,
-				headers: {
-					"User-Agent": "Minetest Bot"
+		for (const match of message.content.matchAll(/(^|\s+)#(\d+)/g)) {
+			let count = 0;
+			for (let i = 0; i < match.index; i++) {
+				if (message.content.charAt(i) === "`") {
+					count++;
 				}
-			}, function(err, res, pkg) {
-				if (pkg.url) {
-					sendGitHubEmbedReply(message, pkg);
+			}
+			// even number of code block starters => all code blocks have been closed
+			// no code block terminator after #id => code block containing id hasn't been closed
+			let not_inside_codeblock = (count % 2 === 0) || (message.content.indexOf("`", match.index + match[0].length) < 0);
+			if (not_inside_codeblock) {
+				const number = parseInt(match[2]);
+				if (number >= reference_min_number) {
+					request({
+						url: "https://api.github.com/repos/minetest/minetest/issues/" + number,
+						json: true,
+						headers: {
+							"User-Agent": "Minetest Bot"
+						}
+					}, function(err, res, pkg) {
+						if (pkg.url) {
+							sendGitHubEmbedReply(message, pkg);
+						}
+					});
 				}
-			});
+			}
 		}
 	} catch (error) {
 		console.error(error);
