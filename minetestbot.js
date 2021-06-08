@@ -161,5 +161,10 @@ client.on("messageReactionAdd", (reaction, user) => {
 	}
 });
 
+client.on("guildMemberAdd", member => {
+	if (member.user.name.toLowerCase().indexOf("twitter.com/h0nde") !== -1)
+		await member.ban({reason: "Malicious bot"});
+});
+
 // Launch
 client.login(token);
