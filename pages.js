@@ -45,7 +45,7 @@ module.exports = {
 					if (!res) break;
 					fields.push({
 						name: `Line ${res[0]}:`,
-						value: `[\`\`\`\n${res[1]}\n\`\`\`](${config.url.display}#L${res[0]})`
+						value: "```md\n"+res[1]+"\n\```"+(config.url.display+"#L"+res[0])
 					})
 				}
 				
