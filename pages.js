@@ -45,7 +45,7 @@ module.exports = {
 					if (!res) break;
 					fields.push({
 						name: `Line ${res[0]}:`,
-						value: "[``" + (res[1].startsWith("`") && " " || "") + res[1].replace(/^\s*\*/, "") + (res[1].endsWith("`") && " " || "") + "``]("+(config.url.display+"#L"+res[0]+")")
+						value: "[``" + (res[1].startsWith("`") && " " || "") + res[1].replace(/^\s*\*/, "").replace(/https?:\/\//gi,"") + (res[1].endsWith("`") && " " || "") + "``]("+(config.url.display+"#L"+res[0]+")")
 					})
 				}
 				
