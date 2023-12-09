@@ -1,7 +1,7 @@
 const {color, version} = require("../config.js")
 const minetest_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png";
-const apiURL = `https://github.com/minetest/minetest/blob/${version}/doc/lua_api.txt`;
-const rawURL = `https://raw.githubusercontent.com/minetest/minetest/${version}/doc/lua_api.txt`;
+const apiURL = `https://github.com/minetest/minetest/blob/${version}/doc/lua_api.md`;
+const rawURL = `https://raw.githubusercontent.com/minetest/minetest/${version}/doc/lua_api.md`;
 const pageSize = 6;
 const pages = require("../pages.js");
 
