@@ -1,7 +1,7 @@
 const {color, version} = require("../config.js")
 const minetest_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png";
-const apiURL = `https://github.com/minetest/minetest/blob/${version}/doc/lua_api.txt`;
-const rawURL = `https://raw.githubusercontent.com/minetest/minetest/${version}/doc/lua_api.txt`;
+const apiURL = `https://github.com/minetest/minetest/blob/${version}/doc/lua_api.md`;
+const rawURL = `https://raw.githubusercontent.com/minetest/minetest/${version}/doc/lua_api.md`;
 const pageSize = 6;
 const pages = require("../pages.js");
 
@@ -21,21 +21,17 @@ module.exports = {
 				color: color,
 				fields: [
 					{
-						name: `lua_api.txt (stable, ${version})`,
+						name: `lua_api.md (stable, ${version})`,
 						value: `Lua API in a text file (use CTRL+F). Located [here](${apiURL}).`
 					},
 					{
-						name: "lua_api.txt (unstable)",
-						value: "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/master/doc/lua_api.txt)."
+						name: "lua_api.md (unstable)",
+						value: "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/master/doc/lua_api.md)."
 					},
 					{
 						name: "Read the Docs Minetest API",
-						value: "lua_api.txt with very nice formatting. Located [here](http://minetest.gitlab.io/minetest/)."
-					},
-					{
-						name: "lua_api.txt with proper markdown",
-						value: "lua_api.txt but looks a little nicer. Located [here](https://rubenwardy.com/minetest_modding_book/lua_api.html)."
-					},
+						value: "lua_api.md with page formatting. Located [here](http://minetest.gitlab.io/minetest/)."
+					}
 				]
 			};
 			const msg = await message.channel.send({embed: embed});
