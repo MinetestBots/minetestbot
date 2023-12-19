@@ -41,7 +41,7 @@ module.exports = {
 			pages.getPage("lua_api", message, {
 				url: {
 					search: rawURL,
-					display: apiURL
+					display: apiURL + "?plain=1",
 				},
 				page: 1,
 				pageSize: pageSize,
@@ -62,7 +62,7 @@ module.exports = {
 			pages.getPage("lua_api", message, {
 				url: {
 					search: rawURL,
-					display: apiURL
+					display: apiURL + "?plain=1",
 				},
 				page: page,
 				pageSize: pageSize,
