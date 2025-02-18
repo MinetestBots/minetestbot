@@ -1,8 +1,8 @@
 {
-	"name": "minetestbot",
-	"version": "2.2.0",
-	"description": "Discord bot with useful Minetest commands.",
-	"main": "minetestbot.js",
+	"name": "luantibot",
+	"version": "2.3.0",
+	"description": "Discord bot with useful Luanti commands.",
+	"main": "luantibot.js",
 	"dependencies": {
 		"discord.js": "^12.0.2",
 		"request": "^2.88.0",

@@ -34,10 +34,10 @@ function gitHubSearchCommand(def, type) {
 			message.channel.send({embed: {color: color, title: "Empty search term."}})
 		} else {
 			request({
-				url: `https://api.github.com/search/issues?q=is:${type}+repo:minetest/minetest+${encodeURI(args.join(" "))}`,
+				url: `https://api.github.com/search/issues?q=is:${type}+repo:luanti-org/luanti+${encodeURI(args.join(" "))}`,
 				json: true,
 				headers: {
-					"User-Agent": "Minetest Bot"
+					"User-Agent": "Luanti Bot"
 				}
 			}, function(err, res, pkg) {
 				sendGitHubEmbedReply(message, pkg.items[0]);

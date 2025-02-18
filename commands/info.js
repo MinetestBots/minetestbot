@@ -12,16 +12,16 @@ function pluralize(time, period) {
 
 function duration(ms) {
 	let sec = (ms / 1000) | 0;
-	
+
 	let min = (sec / 60) | 0;
 	sec -= min * 60;
-	
+
 	let hrs = (min / 60) | 0;
 	min -= hrs * 60;
-	
+
 	let day = (hrs / 24) | 0;
 	hrs -= day * 24;
-	
+
 	let wks = (day / 7) | 0;
 	day -= wks * 7;
 
@@ -38,7 +38,7 @@ module.exports = {
 		const embed = {
 			color: color,
 			title: `${client.user.username} Info`,
-			description: "Open-source, JavaScript-powered, Discord bot providing useful Minetest features. Consider [donating](https://www.patreon.com/GreenXenith/).",
+			description: "Open-source, JavaScript-powered, Discord bot providing useful Luanti features. Consider [donating](https://www.patreon.com/GreenXenith/).",
 			thumbnail: {
 				url: client.user.avatarURL(),
 			},
