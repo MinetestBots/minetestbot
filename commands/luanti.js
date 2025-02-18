@@ -15,8 +15,6 @@ function getDaysSince(dateString) {
     return daysSince;
 }
 
-const rename_date = getDaysSince("13-10-2024");
-
 const commands = {
 	default: {
 		title: "Helpful Luanti Commands",
@@ -173,7 +171,7 @@ const commands = {
             fields: [
                 {
                     name: "The new name was announced on October 13th, 2024.",
-                    value: `That was ${rename_date} days ago.`
+                    value: `That was ${getDaysSince("13-10-2024")} days ago.`
                 }
             ]
         }
