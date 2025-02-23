@@ -159,11 +159,11 @@ const commands = {
 				},
                 {
                     name: "See also: ",
-                    value: "```\nabout renaming```"
+                    value: "```\nabout name```"
                 }
 			]
 		},
-        renaming: {
+        name: {
             name: "Our New Name",
             title: "Introducing Our New Name",
             url: "https://blog.luanti.org/2024/10/13/Introducing-Our-New-Name/",

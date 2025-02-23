@@ -21,4 +21,4 @@
 ### 2.3.0: February 18, 2025
 - Adopt new name
 - Fix links
-- Add ~luanti about renaming command
+- Add ~luanti about name command
