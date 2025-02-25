@@ -1,6 +1,6 @@
 const {prefix} = require("../config.json");
 const {color, version} = require("../config.js");
-const luanti_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png";
+const luanti_logo = `https://upload.wikimedia.org/wikipedia/commons/c/cf/Minetest_logo.png`;
 function getDaysSince(dateString) {
     const [day, month, year] = dateString.split('-');
     const startDate = new Date(year, month - 1, day); // month is 0-indexed in JS Date

@@ -1,5 +1,5 @@
 const {color, version} = require("../config.js")
-const minetest_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png";
+const luanti_logo = `https://upload.wikimedia.org/wikipedia/commons/c/cf/Minetest_logo.png`;
 const apiURL = `https://github.com/luanti-org/luanti/blob/${version}/doc/lua_api.md`;
 const rawURL = `https://raw.githubusercontent.com/luanti-org/luanti/${version}/doc/lua_api.md`;
 const pageSize = 6;
@@ -15,7 +15,7 @@ module.exports = {
 			const embed = {
 				title: "Lua API",
 				thumbnail: {
-					url: minetest_logo,
+					url: luanti_logo,
 				},
 				description: "Luanti Lua API Documentation",
 				color: color,
@@ -46,7 +46,7 @@ module.exports = {
 				page: 1,
 				pageSize: pageSize,
 				title: "Luanti Lua API",
-				thumbnail: minetest_logo,
+				thumbnail: luanti_logo,
 			}, term, async function(embed, results) {
 				let turn = true;
 				if (results.length <= pageSize || results.length > 100) turn = false;
@@ -67,7 +67,7 @@ module.exports = {
 				page: page,
 				pageSize: pageSize,
 				title: "Luanti Lua API",
-				thumbnail: minetest_logo,
+				thumbnail: luanti_logo,
 			}, term, function(embed) {
 				embed.footer.icon_url = oldEmbed.footer.iconURL;
 				message.edit({embed: embed});
