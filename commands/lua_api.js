@@ -1,7 +1,7 @@
 const {color, version} = require("../config.js")
-const minetest_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png";
-const apiURL = `https://github.com/minetest/minetest/blob/${version}/doc/lua_api.md`;
-const rawURL = `https://raw.githubusercontent.com/minetest/minetest/${version}/doc/lua_api.md`;
+const luanti_logo = `https://upload.wikimedia.org/wikipedia/commons/c/cf/Minetest_logo.png`;
+const apiURL = `https://github.com/luanti-org/luanti/blob/${version}/doc/lua_api.md`;
+const rawURL = `https://raw.githubusercontent.com/luanti-org/luanti/${version}/doc/lua_api.md`;
 const pageSize = 6;
 const pages = require("../pages.js");
 
@@ -15,9 +15,9 @@ module.exports = {
 			const embed = {
 				title: "Lua API",
 				thumbnail: {
-					url: minetest_logo,
+					url: luanti_logo,
 				},
-				description: "Minetest Lua API Documentation",
+				description: "Luanti Lua API Documentation",
 				color: color,
 				fields: [
 					{
@@ -26,10 +26,10 @@ module.exports = {
 					},
 					{
 						name: "lua_api.md (unstable)",
-						value: "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/minetest/minetest/blob/master/doc/lua_api.md)."
+						value: "Unstable Lua API in a text file (use CTRL+F). Located [here](https://github.com/luanti-org/luanti/blob/master/doc/lua_api.md)."
 					},
 					{
-						name: "Read the Docs Minetest API",
+						name: "Read the Docs Luanti API",
 						value: "lua_api.md with page formatting. Located [here](http://minetest.gitlab.io/minetest/)."
 					}
 				]
@@ -45,8 +45,8 @@ module.exports = {
 				},
 				page: 1,
 				pageSize: pageSize,
-				title: "Minetest Lua API",
-				thumbnail: minetest_logo,
+				title: "Luanti Lua API",
+				thumbnail: luanti_logo,
 			}, term, async function(embed, results) {
 				let turn = true;
 				if (results.length <= pageSize || results.length > 100) turn = false;
@@ -66,8 +66,8 @@ module.exports = {
 				},
 				page: page,
 				pageSize: pageSize,
-				title: "Minetest Lua API",
-				thumbnail: minetest_logo,
+				title: "Luanti Lua API",
+				thumbnail: luanti_logo,
 			}, term, function(embed) {
 				embed.footer.icon_url = oldEmbed.footer.iconURL;
 				message.edit({embed: embed});

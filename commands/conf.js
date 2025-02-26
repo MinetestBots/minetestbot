@@ -1,7 +1,7 @@
 const {color, version} = require("../config.js")
-const minetest_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png";
-const confURL = `https://github.com/minetest/minetest/blob/${version}/minetest.conf.example`;
-const rawURL = `https://raw.githubusercontent.com/minetest/minetest/${version}/minetest.conf.example`;
+const luanti_logo = `https://upload.wikimedia.org/wikipedia/commons/c/cf/Minetest_logo.png`;
+const confURL = `https://github.com/luanti-org/luanti/blob/${version}/minetest.conf.example`;
+const rawURL = `https://raw.githubusercontent.com/luanti-org/luanti/${version}/minetest.conf.example`;
 const pageSize = 6;
 const pages = require("../pages.js");
 
@@ -13,9 +13,9 @@ module.exports = {
 	execute: async function(message, args) {
 		if (!args.length) {
 			const embed = {
-				title: "Minetest Configuration",
+				title: "Luanti Configuration",
 				thumbnail: {
-					url: minetest_logo,
+					url: luanti_logo,
 				},
 				color: color,
 				fields: [
@@ -25,7 +25,7 @@ module.exports = {
 					},
 					{
 						name: "minetest.conf.example (unstable)",
-						value: "https://github.com/minetest/minetest/blob/master/minetest.conf.example"
+						value: "https://github.com/luanti-org/luanti/blob/master/minetest.conf.example"
 					}
 				]
 			};
@@ -40,8 +40,8 @@ module.exports = {
 				},
 				page: 1,
 				pageSize: pageSize,
-				title: "Minetest Configuration",
-				thumbnail: minetest_logo,
+				title: "Luanti Configuration",
+				thumbnail: luanti_logo,
 			}, term, async function(embed, results) {
 				let turn = true;
 				if (results.length > 100) turn = false;
@@ -61,8 +61,8 @@ module.exports = {
 				},
 				page: page,
 				pageSize: pageSize,
-				title: "Minetest Configuration",
-				thumbnail: minetest_logo,
+				title: "Luanti Configuration",
+				thumbnail: luanti_logo,
 			}, term, function(embed) {
 				embed.footer.icon_url = oldEmbed.footer.iconURL;
 				message.edit({embed: embed});

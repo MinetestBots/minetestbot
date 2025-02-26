@@ -89,10 +89,10 @@ client.on("message", async message => {
 				const number = parseInt(match[2]);
 				if (number >= reference_min_number) {
 					request({
-						url: "https://api.github.com/repos/minetest/minetest/issues/" + number,
+						url: "https://api.github.com/repos/luanti-org/luanti/issues/" + number,
 						json: true,
 						headers: {
-							"User-Agent": "Minetest Bot"
+							"User-Agent": "Luanti Bot"
 						}
 					}, function(err, res, pkg) {
 						if (pkg.url) {

@@ -37,9 +37,9 @@ module.exports = {
 	execute: function(message, args) {
 		if (!args.length) {
 			const embed = {
-				url: "https://content.minetest.net/",
+				url: "https://content.luanti.org/",
 				title: "**ContentDB**",
-				description: "Minetest's official content repository.",
+				description: "Luanti's official content repository.",
 				color: color,
 				thumbnail: {
 					url: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Minetest-logo.svg/1024px-Minetest-logo.svg.png",
@@ -55,7 +55,7 @@ module.exports = {
 		} else {
 			const term = args.join(" ");
 			request({
-				url: `https://content.minetest.net/api/packages/?q=${term}`,
+				url: `https://content.luanti.org/api/packages/?q=${term}`,
 				json: true,
 			}, function(err, res, body) {
 				if (!body.length) {
@@ -67,15 +67,15 @@ module.exports = {
 				} else {
 					const meta = heuristics(body, term);
 					request({
-						url: `https://content.minetest.net/api/packages/${meta.author}/${meta.name}/`,
+						url: `https://content.luanti.org/api/packages/${meta.author}/${meta.name}/`,
 						json: true,
 					}, function(err, res, pkg) {
 						let desc = `${pkg.short_description}`;
 						let info = [];
-						if (pkg.forums) info.push(`[Forum thread](https://forum.minetest.net/viewtopic.php?t=${pkg.forums})`);
+						if (pkg.forums) info.push(`[Forum thread](https://forum.luanti.org/viewtopic.php?t=${pkg.forums})`);
 						if (pkg.repo) info.push(`[Git Repo](${pkg.repo})`);
 						const embed = {
-							url: encodeURI(`https://content.minetest.net/packages/${meta.author}/${meta.name}/`),
+							url: encodeURI(`https://content.luanti.org/packages/${meta.author}/${meta.name}/`),
 							title: `**${pkg.title}**`,
 							description: `By ${pkg.author}`,
 							color: color,

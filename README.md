@@ -1,7 +1,7 @@
-# MinetestBot for Discord #
-_MinetestBot and it's author(s) are in no way affiliated with the IRC MinetestBot._  
+# LuantiBot for Discord #
+_LuantiBot and it's author(s) are in no way affiliated with the IRC MinetestBot._
 
-Uses NodeJS and `discord.js`.  
+Uses NodeJS and `discord.js`.
 
 ## Installation ##
 
@@ -9,14 +9,14 @@ Uses NodeJS and `discord.js`.
 git clone https://github.com/GreenXenith/minetestbot.git
 cd minetestbot
 npm install
-``` 
+```
 
-MinetestBot demands a ~~sacrifice~~ `config.json`. See `config.json.example`.  
+LuantiBot demands a ~~sacrifice~~ `config.json`. See `config.json.example`.
 
 ## Usage ##
 
-To use the bot, run `node .` in the bot directory.  
-I recommend you use a cron job or systemd service  
+To use the bot, run `node .` in the bot directory.
+I recommend you use a cron job or systemd service
 
 ### Todo (PRs welcome) ###
 * Better CDB search
@@ -26,6 +26,6 @@ I recommend you use a cron job or systemd service
 * Word definition
 * Forum search
 
-Might be missing `;` everywhere, or have too many.  
+Might be missing `;` everywhere, or have too many.
 
-This used to be written in Lua, but Luvit is garbage.  
+This used to be written in Lua, but Luvit is garbage.

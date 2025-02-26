@@ -17,3 +17,8 @@
 - Add #number references for pull requests and issues
 - Add ~pr command for searching pull requests
 - Add ~issue command for searching issues
+
+### 2.3.0: February 18, 2025
+- Adopt new name
+- Fix links
+- Add ~luanti about name command

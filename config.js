@@ -4,9 +4,9 @@ const request = require("sync-request");
 let version = "";
 
 console.log("Loading configurations...");
-const res = request("GET", "https://api.github.com/repos/minetest/minetest/releases/latest", {
+const res = request("GET", "https://api.github.com/repos/luanti-org/luanti/releases/latest", {
 	headers: {
-		"User-Agent": "https://github.com/GreenXenith/minetestbot/ Minetest latest version fetcher"
+		"User-Agent": "https://github.com/GreenXenith/minetestbot/ Luanti latest version fetcher"
 	}
 });
 version = JSON.parse(res.getBody('utf8')).tag_name;
