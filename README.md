@@ -1,3 +1,5 @@
+# MinetestBot has merged with https://github.com/MinetestBots/dungeonmaster
+
 # LuantiBot for Discord #
 _LuantiBot and it's author(s) are in no way affiliated with the IRC MinetestBot._
 
